@@ -57,7 +57,6 @@
       }
       const DeleteNote = () => {
         store.commit("deleteNote", note)
-        // clearNote()
         router.push("/")
       }
 
@@ -105,20 +104,16 @@
         if (currentRoute.value.params.id) {
           // undo changes
         } else {
-          clearNote()
         }
         router.push("/")
       }
       const clearNote = () => {
-        // const id = store.getters.getIdOfLastNote + 1
-        // store.dispatch("setCurrentNote", {
-        //   title: "",
-        //   todos: [] as ToDo[],
-        //   id: id
-        // })
-        // note.id = id
-        // note.title = ""
-        // note.todos = []
+        const id = store.getters.getIdOfLastNote + 1
+        store.commit("setCurrentNote", {
+          title: "",
+          todos: [] as ToDo[],
+          id: id
+        } as Note)
       }
 
       return {

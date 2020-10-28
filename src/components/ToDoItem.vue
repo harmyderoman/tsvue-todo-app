@@ -60,8 +60,6 @@
           return this.todo.completed
         },
         set(value: boolean) {
-          console.log("From Todo. Checked:")
-          console.log(value)
           this.$emit("checkbox-click", value)
         }
       }

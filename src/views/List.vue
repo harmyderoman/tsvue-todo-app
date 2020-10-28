@@ -22,7 +22,6 @@
   export default {
     computed: {
       notes() {
-        console.log(this.$store.state.notes)
         return this.$store.state.notes
       }
     }
