@@ -13,23 +13,23 @@ export default createStore({
   },
   mutations: {
     addNote(state) {
-      state.notes.push(state.currentNote)
+      state.notes.push(JSON.parse(JSON.stringify(state.currentNote)))
     },
-    deleteNote(state, payload: Note) {
+    deleteNote(state) {
       state.notes = state.notes.filter(note => note.id != state.currentNote.id)
     },
     updateNote(state) {
       let note = state.notes.find(note => note.id === state.currentNote.id)
-      note = state.currentNote
+      let index = state.notes.indexOf(note as Note)
+      state.notes[index] = JSON.parse(JSON.stringify(state.currentNote))
     },
     setCurrentNote(state, payload: Note) {
-      state.currentNote = payload
+      state.currentNote = JSON.parse(JSON.stringify(payload))
     },
     updateTitle(state, payload: string) {
       state.currentNote.title = payload
     },
     updateTodos(state, payload) {
-      // let i = state.currentNote.todos.indexOf(payload)
       state.currentNote.todos = payload
     },
     addNewTodo(state) {
@@ -39,7 +39,6 @@ export default createStore({
       })
     },
     deleteTodo(state, index) {
-      // let i = state.currentNote.todos.indexOf(todo)
       state.currentNote.todos.splice(index, 1)
     }
   },
@@ -47,7 +46,7 @@ export default createStore({
     saveNote({ commit }) {
 
       const isOldNote: boolean = this.state.notes.some(el => el.id === this.state.currentNote.id)
-      console.log(isOldNote)
+      console.log(`Its old note: ${isOldNote}`)
       if (isOldNote) {
         commit('updateNote')
       }
@@ -63,9 +62,6 @@ export default createStore({
     updateCurrentNote({ commit }, note: Note) {
       commit('setCurrentNote', note)
     },
-    // updateTodo({ commit }, todo: ToDo, index: number){
-    //   let todos = this.state.currentNote.todos
-    // }
 
   },
   getters: {

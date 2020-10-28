@@ -56,6 +56,11 @@
         store.dispatch("saveNote")
         router.push("/")
       }
+      const DeleteNote = () => {
+        store.commit("deleteNote", note)
+        // clearNote()
+        router.push("/")
+      }
 
       const { currentRoute } = router
       const fetchNote = () => {
@@ -94,6 +99,7 @@
         let todos = JSON.parse(JSON.stringify(store.state.currentNote.todos))
 
         todos[index].completed = value
+        console.log(todos[index].completed)
         store.commit("updateTodos", todos)
       }
 
@@ -115,11 +121,6 @@
         // note.id = id
         // note.title = ""
         // note.todos = []
-      }
-      const DeleteNote = () => {
-        store.commit("deleteNote", note)
-        // clearNote()
-        router.push("/")
       }
 
       return {
