@@ -52,7 +52,6 @@
       const note = computed(() => store.state.currentNote)
 
       const saveNote = () => {
-        console.log(note)
         store.dispatch("saveNote")
         router.push("/")
       }
@@ -99,7 +98,6 @@
         let todos = JSON.parse(JSON.stringify(store.state.currentNote.todos))
 
         todos[index].completed = value
-        console.log(todos[index].completed)
         store.commit("updateTodos", todos)
       }
 

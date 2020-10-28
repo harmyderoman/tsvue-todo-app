@@ -46,7 +46,7 @@ export default createStore({
     saveNote({ commit }) {
 
       const isOldNote: boolean = this.state.notes.some(el => el.id === this.state.currentNote.id)
-      console.log(`Its old note: ${isOldNote}`)
+
       if (isOldNote) {
         commit('updateNote')
       }
