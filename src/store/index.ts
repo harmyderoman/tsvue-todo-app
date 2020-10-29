@@ -29,7 +29,7 @@ export default createStore({
     updateTitle(state, payload: string) {
       state.currentNote.title = payload
     },
-    updateTodos(state, payload) {
+    updateTodos(state, payload: ToDo[]) {
       state.currentNote.todos = payload
     },
     addNewTodo(state) {
@@ -38,15 +38,13 @@ export default createStore({
         completed: false
       })
     },
-    deleteTodo(state, index) {
+    deleteTodo(state, index: number) {
       state.currentNote.todos.splice(index, 1)
     }
   },
   actions: {
     saveNote({ commit }) {
-
       const isOldNote: boolean = this.state.notes.some(el => el.id === this.state.currentNote.id)
-
       if (isOldNote) {
         commit('updateNote')
       }

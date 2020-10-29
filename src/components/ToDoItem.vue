@@ -47,10 +47,10 @@
       }
     },
     methods: {
-      setEditFalse() {
-        this.editable = false
-      },
-      onTextChange(e: { target: { value: any } }) {
+      // setEditFalse() {
+      //   this.editable = false
+      // },
+      onTextChange(e: { target: { value: string } }) {
         this.$emit("update-todo", e.target.value)
       }
     },
