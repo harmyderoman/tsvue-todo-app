@@ -37,7 +37,7 @@
 
 <script lang="ts">
   import TodoItem from "@/components/ToDoItem.vue"
-  import { defineComponent, reactive, computed, onMounted } from "vue"
+  import { defineComponent, computed, onMounted } from "vue"
   import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
@@ -63,7 +63,7 @@
       const { currentRoute } = router
       const fetchNote = () => {
         if (currentRoute.value.params.id) {
-          const routeId = +currentRoute.value.params.id
+          const routeId: number = +currentRoute.value.params.id
           store.dispatch("fetchCurrentNote", routeId)
         } else {
           const id = store.getters.getIdOfLastNote + 1
