@@ -6,7 +6,7 @@
     <h3>{{ note.id }}</h3>
     <ul>
       <li
-        :class="todo.completed ? 'completed' : ''"
+        :class="{ completed: todo.completed }"
         v-for="(todo, index) in note.todos"
         :key="index"
       >
