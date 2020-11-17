@@ -87,24 +87,21 @@
       const onRemoveTodo = (index: number) => {
         store.commit("deleteTodo", index)
       }
-      const onUpdateTodo = (text: any, index: any) => {
-        let todos = JSON.parse(JSON.stringify(store.state.currentNote.todos))
+      const onUpdateTodo = (text: string, index: number) => {
+        let todos = [...store.state.currentNote.todos]
 
-        todos[index].text = text
+        todos[index] = { ...todos[index], text }
         store.commit("updateTodos", todos)
       }
-      const onCheckboxClick = (value: boolean, index: number) => {
-        let todos = JSON.parse(JSON.stringify(store.state.currentNote.todos))
+      const onCheckboxClick = (completed: boolean, index: number) => {
+        let todos = [...store.state.currentNote.todos]
 
-        todos[index].completed = value
+        todos[index] = { ...todos[index], completed }
         store.commit("updateTodos", todos)
       }
 
       const cancelEdit = () => {
-        if (currentRoute.value.params.id) {
-          // undo changes
-        } else {
-        }
+        // undo changes
         router.push("/")
       }
       const clearNote = () => {

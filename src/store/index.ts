@@ -13,7 +13,7 @@ export default createStore({
   },
   mutations: {
     addNote(state) {
-      state.notes.push(JSON.parse(JSON.stringify(state.currentNote)))
+      state.notes.push(state.currentNote)
     },
     deleteNote(state) {
       state.notes = state.notes.filter(note => note.id != state.currentNote.id)
@@ -21,10 +21,11 @@ export default createStore({
     updateNote(state) {
       let note = state.notes.find(note => note.id === state.currentNote.id)
       let index = state.notes.indexOf(note as Note)
-      state.notes[index] = JSON.parse(JSON.stringify(state.currentNote))
+      state.notes[index] = state.currentNote
+
     },
     setCurrentNote(state, payload: Note) {
-      state.currentNote = JSON.parse(JSON.stringify(payload))
+      state.currentNote = payload
     },
     updateTitle(state, payload: string) {
       state.currentNote.title = payload
@@ -54,7 +55,7 @@ export default createStore({
 
     },
     fetchCurrentNote({ commit }, noteId: number) {
-      let note = this.state.notes.find(note => note.id === noteId)
+      let note = JSON.parse(JSON.stringify(this.state.notes.find(note => note.id === noteId)))
       commit('setCurrentNote', note)
     },
     updateCurrentNote({ commit }, note: Note) {
