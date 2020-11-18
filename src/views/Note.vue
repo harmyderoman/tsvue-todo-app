@@ -1,7 +1,12 @@
 <template>
   <div class="card shadow-inset bg-primary border-light p-4 rounded">
     <div class="card-body p-0">
-      <input class="form-control" :value="note.title" @input="updateTitle" />
+      <input
+        class="form-control"
+        :value="note.title"
+        @input="updateTitle"
+        placeholder="Enter Title"
+      />
       <h2>{{ note.title }}</h2>
       <hr />
       <ul>

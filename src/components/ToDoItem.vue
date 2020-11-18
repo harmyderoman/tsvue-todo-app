@@ -1,9 +1,8 @@
 <template>
-  <li>
+  <li class="card bg-primary border-light shadow-soft">
     <div class="todo-body">
       <input v-model="checked" type="checkbox" />
-    </div>
-    <div>
+
       <span
         :class="{ completed: todo.completed && todo.text }"
         v-if="!editable"
@@ -12,6 +11,7 @@
         {{ todo.text ? todo.text : "Click to edit Todo" }}
       </span>
       <input
+        class="form-control"
         v-else
         type="text"
         :value="todo.text"
@@ -21,10 +21,19 @@
     </div>
 
     <div class="todo-actions">
-      <button @click="editable = !editable">
+      <button
+        class="btn btn-sm btn-primary  mr-3"
+        @click="editable = !editable"
+        :class="{ 'text-info': editable }"
+      >
         {{ editable ? "Save" : "Edit" }}
       </button>
-      <button @click="$emit('remove-todo', todo)">Delete</button>
+      <button
+        class="btn btn-sm btn-primary text-danger mr-3"
+        @click="$emit('remove-todo', todo)"
+      >
+        Delete
+      </button>
     </div>
   </li>
 </template>
@@ -70,17 +79,19 @@
 <style scoped>
   span {
     word-wrap: none;
+    padding-left: 10px;
   }
   li {
     display: flex;
     flex-wrap: nowrap;
-    background-color: #e2e2e2;
-    height: 36px;
-    margin: 5px 0px;
-    padding-top: 5px;
+    flex-direction: row;
+    padding-top: 0px;
     padding-left: 10px;
     padding-right: 15px;
-    border-radius: 5px;
+    height: 60px;
+    margin: 10px 0px;
+    /**background-color: #e2e2e2;
+    border-radius: 5px;*/
   }
   .completed {
     text-decoration: line-through;
@@ -93,21 +104,27 @@
   input[type="text"] {
     width: auto;
     max-width: 180px;
-    height: 25px;
-    padding: 4px 10px;
+    height: 30px;
+    padding: 0px 10px;
     border: none;
     border-radius: 5px;
-    font-family: cursive, sans-serif;
-    color: #8a8a8a;
+    /**font-family: cursive, sans-serif;
+    color: #8a8a8a;*/
   }
   div {
     display: flex;
     justify-content: flex-start;
   }
+  .todo-body {
+    display: flex;
+    align-items: center;
+    padding-left: 20px;
+  }
   .todo-actions {
     flex-grow: 1;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
   }
   @media screen and (max-width: 375px) {
     input[type="text"] {
