@@ -36,6 +36,6 @@
 <style>
   @import "./assets/css/neumorphism.css";
   #app {
-    padding: 10px 25px;
+    padding: 5px 10px;
   }
 </style>

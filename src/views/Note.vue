@@ -1,5 +1,5 @@
 <template>
-  <div class="card shadow-inset bg-primary border-light p-4 rounded">
+  <div class="card shadow-soft bg-primary border-light p-4 rounded">
     <div class="card-body p-0">
       <input
         class="form-control"
@@ -163,5 +163,8 @@
     padding-left: 10px;
     padding-right: 15px;
     border-radius: 5px;
+  }
+  ul {
+    padding-inline-start: 5px;
   }
 </style>
