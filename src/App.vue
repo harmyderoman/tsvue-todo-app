@@ -5,7 +5,6 @@
         <li class="nav-item">
           <router-link
             class="nav-link mb-sm-3 mb-md-0"
-            data-toggle="tab"
             to="/"
             active-class="active"
             exact
@@ -15,7 +14,6 @@
         <li class="nav-item">
           <router-link
             class="nav-link mb-sm-3 mb-md-0"
-            data-toggle="tab"
             to="/note"
             active-class="active"
             exact
@@ -24,12 +22,6 @@
         </li>
       </ul>
     </div>
-    <nav>
-      <router-link class="router-link" to="/" exact>List Of Notes</router-link>
-      <router-link class="router-link" to="/note" exact
-        >Create Note</router-link
-      >
-    </nav>
     <hr />
     <router-view />
   </div>
@@ -43,4 +35,7 @@
 
 <style>
   @import "./assets/css/neumorphism.css";
+  #app {
+    padding: 10px 25px;
+  }
 </style>
