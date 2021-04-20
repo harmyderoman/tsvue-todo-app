@@ -1,37 +1,56 @@
 <template>
-  <div class="note-page">
-    <input :value="note.title" @input="updateTitle" />
-    <h2>{{ note.title }}</h2>
-    <hr />
-    <ul>
-      <TodoItem
-        v-for="(todo, index) in note.todos"
-        :todo="todo"
-        :key="index"
-        @remove-todo="onRemoveTodo(index)"
-        @update-todo="onUpdateTodo($event, index)"
-        @checkbox-click="onCheckboxClick($event, index)"
+  <div class="card shadow-soft bg-primary border-light p-4 rounded">
+    <div class="card-body p-0">
+      <input
+        class="form-control"
+        :value="note.title"
+        @input="updateTitle"
+        placeholder="Enter Title"
       />
-    </ul>
-    <div class="new-todo">
-      <button @click="addNewTodo">
-        Add Todo
-      </button>
-      <span @click="addNewTodo">Add New Todo</span>
+      <h2>{{ note.title }}</h2>
+      <hr />
+      <ul>
+        <TodoItem
+          v-for="(todo, index) in note.todos"
+          :todo="todo"
+          :key="index"
+          @remove-todo="onRemoveTodo(index)"
+          @update-todo="onUpdateTodo($event, index)"
+          @checkbox-click="onCheckboxClick($event, index)"
+        />
+      </ul>
+      <div>
+        <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
+          Add Todo
+        </button>
+        <!-- <span @click="addNewTodo">Add New Todo</span> -->
+      </div>
+      <hr />
+      <div>
+        <button
+          class="btn btn-primary text-success mr-2 mb-2"
+          type="button"
+          @click="saveNote"
+        >
+          Save
+        </button>
+        <button
+          class="btn btn-primary text-info mr-2 mb-2"
+          type="button"
+          @click="cancelEdit"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn btn-primary text-danger mr-2 mb-2"
+          type="button"
+          @click="DeleteNote"
+        >
+          Delete
+        </button>
+      </div>
+      <hr />
     </div>
-    <hr />
-    <div>
-      <button @click="saveNote">
-        Save
-      </button>
-      <button @click="cancelEdit">
-        Cancel
-      </button>
-      <button @click="DeleteNote">
-        Delete
-      </button>
-    </div>
-    <hr />
   </div>
 </template>
 
@@ -144,5 +163,8 @@
     padding-left: 10px;
     padding-right: 15px;
     border-radius: 5px;
+  }
+  ul {
+    padding-inline-start: 5px;
   }
 </style>
