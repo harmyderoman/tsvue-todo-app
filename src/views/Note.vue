@@ -23,7 +23,6 @@
         <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
           Add Todo
         </button>
-        <!-- <span @click="addNewTodo">Add New Todo</span> -->
       </div>
       <hr />
       <div>
