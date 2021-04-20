@@ -35,7 +35,16 @@
 
 <style>
   @import "./assets/css/neumorphism.css";
+
   #app {
     padding: 5px 10px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  @media screen and (max-width: 768px) {
+    #app {
+      padding: 0px 5px;
+    }
   }
 </style>

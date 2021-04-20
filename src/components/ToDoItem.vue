@@ -99,11 +99,11 @@
   input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    margin-right: 20px;
+    margin-right: 10px;
   }
   input[type="text"] {
     width: auto;
-    max-width: 180px;
+    max-width: 300px;
     height: 30px;
     padding: 0px 10px;
     border: none;
@@ -118,7 +118,7 @@
   .todo-body {
     display: flex;
     align-items: center;
-    padding-left: 20px;
+    padding-left: 15px;
   }
   .todo-actions {
     flex-grow: 1;
@@ -126,9 +126,21 @@
     justify-content: flex-end;
     align-items: center;
   }
-  @media screen and (max-width: 375px) {
+  @media screen and (max-width: 768px) {
+    li {
+      padding-right: 0;
+    }
     input[type="text"] {
       max-width: 150px;
+    }
+    input[type="text"] {
+      max-width: 150px;
+    }
+    input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    .todo-body {
+      padding-left: 5px;
     }
   }
 </style>
