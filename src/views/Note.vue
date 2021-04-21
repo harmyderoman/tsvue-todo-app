@@ -16,6 +16,7 @@
         Redo
       </button>
     </div>
+    <hr />
     <div class="card-body p-0">
       <input
         class="form-control"
@@ -24,7 +25,7 @@
         placeholder="Enter Title"
       />
       <h2>{{ note.title }}</h2>
-      <hr />
+      <!-- <hr /> -->
       <ul>
         <TodoItem
           v-for="(todo, index) in note.todos"
