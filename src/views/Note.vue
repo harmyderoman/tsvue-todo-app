@@ -1,5 +1,21 @@
 <template>
   <div class="card shadow-soft bg-primary border-light p-4 rounded">
+    <div>
+      <button
+        class="btn btn-primary text-success mr-2 mb-2"
+        type="button"
+        @click="undo"
+      >
+        Undo
+      </button>
+      <button
+        class="btn btn-primary text-info mr-2 mb-2"
+        type="button"
+        @click="redo"
+      >
+        Redo
+      </button>
+    </div>
     <div class="card-body p-0">
       <input
         class="form-control"
@@ -130,9 +146,17 @@
           id: id
         } as Note)
       }
+      const undo = () => {
+        store.commit("undoChanges")
+      }
+      const redo = () => {
+        store.commit("redoChanges")
+      }
 
       return {
         note,
+        undo,
+        redo,
         saveNote,
         addNewTodo,
         cancelEdit,

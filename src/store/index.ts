@@ -1,18 +1,23 @@
 import { createStore } from 'vuex'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
-import { useStorage } from '@vueuse/core'
+import { useStorage, useRefHistory } from '@vueuse/core'
+import { ref } from 'vue'
 
 const localStorageNotes: any = useStorage('my-notes', [] as Note[])
+const note: any = ref({
+  title: "",
+  todos: [] as ToDo[],
+  id: 0
+} as Note)
+const { history, undo, redo } = useRefHistory(note, {
+  deep: true
+})
 
 export default createStore({
   state: {
     notes: localStorageNotes as Note[],
-    currentNote: {
-      title: "",
-      todos: [] as ToDo[],
-      id: 0
-    } as Note
+    currentNote: note as Note
   },
   mutations: {
     addNote(state) {
@@ -43,6 +48,12 @@ export default createStore({
     },
     deleteTodo(state, index: number) {
       state.currentNote.todos.splice(index, 1)
+    },
+    undoChanges() {
+      undo()
+    },
+    redoChanges() {
+      redo()
     }
   },
   actions: {
@@ -62,7 +73,7 @@ export default createStore({
     },
     updateCurrentNote({ commit }, note: Note) {
       commit('setCurrentNote', note)
-    },
+    }
 
   },
   getters: {
