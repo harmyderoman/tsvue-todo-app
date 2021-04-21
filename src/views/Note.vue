@@ -4,6 +4,7 @@
       <button
         class="btn btn-primary text-success mr-2 mb-2"
         type="button"
+        :disabled="!canUndo"
         @click="undo"
       >
         Undo
@@ -12,6 +13,7 @@
         class="btn btn-primary text-info mr-2 mb-2"
         type="button"
         @click="redo"
+        :disabled="!canRedo"
       >
         Redo
       </button>
@@ -85,6 +87,8 @@
     },
     setup() {
       const note = computed(() => store.state.currentNote)
+      const canUndo = computed(() => store.getters.canUndo)
+      const canRedo = computed(() => store.getters.canRedo)
 
       const saveNote = () => {
         store.dispatch("saveNote")
@@ -158,6 +162,8 @@
         note,
         undo,
         redo,
+        canUndo,
+        canRedo,
         saveNote,
         addNewTodo,
         cancelEdit,

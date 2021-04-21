@@ -10,7 +10,7 @@ const note: any = ref({
   todos: [] as ToDo[],
   id: 0
 } as Note)
-const { history, undo, redo } = useRefHistory(note, {
+const { history, undo, redo, canUndo, canRedo } = useRefHistory(note, {
   deep: true
 })
 
@@ -85,6 +85,12 @@ export default createStore({
       } else {
         return 0
       }
+    },
+    canUndo() {
+      return canUndo.value
+    },
+    canRedo() {
+      return canRedo.value
     }
   },
   strict: true
