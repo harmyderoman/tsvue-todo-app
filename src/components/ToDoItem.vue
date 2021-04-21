@@ -40,9 +40,8 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from "vue"
+  import { defineComponent, PropType, ref } from "vue"
   import ToDo from "@/models/ToDoModel"
-  import { ref } from "vue"
   import { onClickOutside } from "@vueuse/core"
 
   export default defineComponent({
