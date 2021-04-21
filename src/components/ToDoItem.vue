@@ -1,5 +1,5 @@
 <template>
-  <li class="card bg-primary border-light shadow-soft">
+  <li ref="todoItem" class="card bg-primary border-light shadow-soft">
     <div class="todo-body">
       <input v-model="checked" type="checkbox" />
 
@@ -11,13 +11,12 @@
         {{ todo.text ? todo.text : "Click to edit Todo" }}
       </span>
       <input
-        ref="textInput"
         class="form-control"
         v-else
         type="text"
         :value="todo.text"
         @input="onTextChange"
-        v-on:keyup.enter="editable = !editable"
+        @keyup.enter="editable = !editable"
       />
     </div>
 
@@ -53,14 +52,16 @@
       }
     },
     setup() {
-      const textInput = ref(null)
+      const todoItem = ref(null)
       const editable = ref(false)
 
-      onClickOutside(textInput, () => {
-        editable.value = false
+      onClickOutside(todoItem, () => {
+        if (editable.value) {
+          editable.value = false
+        }
       })
 
-      return { textInput, editable }
+      return { todoItem, editable }
     },
     methods: {
       onTextChange(e: { target: { value: string } }) {
