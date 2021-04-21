@@ -1,10 +1,13 @@
 import { createStore } from 'vuex'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
+import { useStorage } from '@vueuse/core'
+
+const localStorageNotes: any = useStorage('my-notes', [] as Note[])
 
 export default createStore({
   state: {
-    notes: [] as Note[],
+    notes: localStorageNotes as Note[],
     currentNote: {
       title: "",
       todos: [] as ToDo[],
@@ -22,7 +25,6 @@ export default createStore({
       let note = state.notes.find(note => note.id === state.currentNote.id)
       let index = state.notes.indexOf(note as Note)
       state.notes[index] = state.currentNote
-
     },
     setCurrentNote(state, payload: Note) {
       state.currentNote = payload
