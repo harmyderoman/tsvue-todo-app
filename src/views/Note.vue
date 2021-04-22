@@ -1,5 +1,24 @@
 <template>
   <div class="card shadow-soft bg-primary border-light p-4 rounded">
+    <div>
+      <button
+        class="btn btn-primary text-success mr-2 mb-2"
+        type="button"
+        :disabled="!canUndo"
+        @click="undo"
+      >
+        Undo
+      </button>
+      <button
+        class="btn btn-primary text-info mr-2 mb-2"
+        type="button"
+        @click="redo"
+        :disabled="!canRedo"
+      >
+        Redo
+      </button>
+    </div>
+    <hr />
     <div class="card-body p-0">
       <input
         class="form-control"
@@ -8,7 +27,7 @@
         placeholder="Enter Title"
       />
       <h2>{{ note.title }}</h2>
-      <hr />
+      <!-- <hr /> -->
       <ul>
         <TodoItem
           v-for="(todo, index) in note.todos"
@@ -23,7 +42,6 @@
         <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
           Add Todo
         </button>
-        <!-- <span @click="addNewTodo">Add New Todo</span> -->
       </div>
       <hr />
       <div>
@@ -69,6 +87,8 @@
     },
     setup() {
       const note = computed(() => store.state.currentNote)
+      const canUndo = computed(() => store.getters.canUndo)
+      const canRedo = computed(() => store.getters.canRedo)
 
       const saveNote = () => {
         store.dispatch("saveNote")
@@ -131,9 +151,19 @@
           id: id
         } as Note)
       }
+      const undo = () => {
+        store.commit("undoChanges")
+      }
+      const redo = () => {
+        store.commit("redoChanges")
+      }
 
       return {
         note,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
         saveNote,
         addNewTodo,
         cancelEdit,

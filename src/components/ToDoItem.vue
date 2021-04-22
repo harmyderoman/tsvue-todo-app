@@ -11,6 +11,7 @@
         {{ todo.text ? todo.text : "Click to edit Todo" }}
       </span>
       <input
+        ref="textInput"
         class="form-control"
         v-else
         type="text"
@@ -39,8 +40,9 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType } from "vue"
+  import { defineComponent, PropType, ref } from "vue"
   import ToDo from "@/models/ToDoModel"
+  import { onClickOutside } from "@vueuse/core"
 
   export default defineComponent({
     name: "TodoItem",
@@ -50,15 +52,17 @@
         required: true
       }
     },
-    data() {
-      return {
-        editable: false
-      }
+    setup() {
+      const textInput = ref(null)
+      const editable = ref(false)
+
+      onClickOutside(textInput, () => {
+        editable.value = false
+      })
+
+      return { textInput, editable }
     },
     methods: {
-      // setEditFalse() {
-      //   this.editable = false
-      // },
       onTextChange(e: { target: { value: string } }) {
         this.$emit("update-todo", e.target.value)
       }

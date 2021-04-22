@@ -1,15 +1,23 @@
 import { createStore } from 'vuex'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
+import { useStorage, useRefHistory } from '@vueuse/core'
+import { ref } from 'vue'
+
+const localStorageNotes: any = useStorage('my-notes', [] as Note[])
+const note: any = ref({
+  title: "",
+  todos: [] as ToDo[],
+  id: 0
+} as Note)
+const { history, undo, redo, canUndo, canRedo } = useRefHistory(note, {
+  deep: true
+})
 
 export default createStore({
   state: {
-    notes: [] as Note[],
-    currentNote: {
-      title: "",
-      todos: [] as ToDo[],
-      id: 0
-    } as Note
+    notes: localStorageNotes as Note[],
+    currentNote: note as Note
   },
   mutations: {
     addNote(state) {
@@ -22,7 +30,6 @@ export default createStore({
       let note = state.notes.find(note => note.id === state.currentNote.id)
       let index = state.notes.indexOf(note as Note)
       state.notes[index] = state.currentNote
-
     },
     setCurrentNote(state, payload: Note) {
       state.currentNote = payload
@@ -41,6 +48,12 @@ export default createStore({
     },
     deleteTodo(state, index: number) {
       state.currentNote.todos.splice(index, 1)
+    },
+    undoChanges() {
+      undo()
+    },
+    redoChanges() {
+      redo()
     }
   },
   actions: {
@@ -60,7 +73,7 @@ export default createStore({
     },
     updateCurrentNote({ commit }, note: Note) {
       commit('setCurrentNote', note)
-    },
+    }
 
   },
   getters: {
@@ -72,6 +85,12 @@ export default createStore({
       } else {
         return 0
       }
+    },
+    canUndo() {
+      return canUndo.value
+    },
+    canRedo() {
+      return canRedo.value
     }
   },
   strict: true
