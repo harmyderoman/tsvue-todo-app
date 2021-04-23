@@ -24,15 +24,11 @@
     </div>
     <hr />
     <router-view />
-    <modal-window />
   </div>
 </template>
 
 <script>
-  import ModalWindow from "./components/ModalWindow.vue"
-
   export default {
-    components: { ModalWindow },
     name: "App"
   }
 </script>

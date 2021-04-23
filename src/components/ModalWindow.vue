@@ -1,11 +1,10 @@
 <template>
-  <!-- Modal Content -->
   <div class="" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h2 class="h6 modal-title mb-0" id="modal-title-default">
-            Terms of Service
+            {{ title }}
           </h2>
           <button type="button" class="close" aria-label="Close">
             <span aria-hidden="true">×</span>
@@ -13,22 +12,23 @@
         </div>
         <div class="modal-body">
           <p>
-            With less than a month to go before the European Union enacts new
-            consumer privacy laws for its citizens, companies around the world
-            are updating their terms of service agreements to comply.
-          </p>
-          <p>
-            The European Union’s General Data Protection Regulation (G.D.P.R.)
-            goes into effect on May 25 and is meant to ensure a common set of
-            data rights in the European Union. It requires organizations to
-            notify users as soon as possible of high-risk data breaches that
-            could personally affect them.
+            {{ text }}
           </p>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-sm btn-primary">I Got It</button>
-          <button type="button" class="btn btn-primary text-danger ml-auto">
-            Close
+          <button
+            type="button"
+            class="btn btn-primary text-success"
+            @click="accept"
+          >
+            Confirm
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary text-danger ml-auto"
+            @click="reject"
+          >
+            Cancel
           </button>
         </div>
       </div>
@@ -41,9 +41,19 @@
 
   export default defineComponent({
     name: "ModalWindow",
+    props: {
+      title: String,
+      text: String
+    },
     methods: {
       close() {
         this.$emit("close")
+      },
+      accept() {
+        this.$emit("confirm", true)
+      },
+      reject() {
+        this.$emit("confirm", false)
       }
     }
   })

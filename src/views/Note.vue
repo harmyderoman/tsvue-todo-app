@@ -69,12 +69,19 @@
       </div>
       <hr />
     </div>
+    <modal-window
+      :text="modalText"
+      :title="modalTitle"
+      @confirm="confirmFunc"
+    />
   </div>
 </template>
 
 <script lang="ts">
   import TodoItem from "@/components/ToDoItem.vue"
-  import { defineComponent, computed, onMounted } from "vue"
+  import ModalWindow from "@/components/ModalWindow.vue"
+
+  import { defineComponent, computed, onMounted, ref } from "vue"
   import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
@@ -83,7 +90,8 @@
   export default defineComponent({
     name: "Note",
     components: {
-      TodoItem
+      TodoItem,
+      ModalWindow
     },
     setup() {
       const note = computed(() => store.state.currentNote)
@@ -157,6 +165,22 @@
       const redo = () => {
         store.commit("redoChanges")
       }
+      // Modal Logic
+      const showModal = ref(false)
+      const modalTitle = ref("Title 1")
+      const modalText = ref("Paragraph 1")
+      const confirmFunc = (result: boolean) => {
+        return result
+      }
+
+      const confirm = (text1: string, text2: string, func: Function) => {
+        //show modal true
+        modalTitle.value = text1
+        modalText.value = text2
+        // let result: boolean = await confirmFunc()
+
+        return
+      }
 
       return {
         note,
@@ -172,7 +196,11 @@
         DeleteNote,
         clearNote,
         updateTitle,
-        onCheckboxClick
+        onCheckboxClick,
+        showModal,
+        confirm,
+        modalTitle,
+        modalText
       }
     },
     beforeRouteLeave(to, from, next) {
