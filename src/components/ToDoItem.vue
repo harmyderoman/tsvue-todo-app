@@ -1,5 +1,5 @@
 <template>
-  <li class="card bg-primary border-light shadow-soft">
+  <li ref="textInput" class="card bg-primary border-light shadow-soft">
     <div class="todo-body">
       <input v-model="checked" type="checkbox" />
 
@@ -11,7 +11,6 @@
         {{ todo.text ? todo.text : "Click to edit Todo" }}
       </span>
       <input
-        ref="textInput"
         class="form-control"
         v-else
         type="text"
