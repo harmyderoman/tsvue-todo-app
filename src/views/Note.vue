@@ -74,7 +74,7 @@
 
 <script lang="ts">
   import TodoItem from "@/components/ToDoItem.vue"
-  import { defineComponent, computed, onMounted } from "vue"
+  import { defineComponent, computed, onMounted, ref } from "vue"
   import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
@@ -106,7 +106,8 @@
           store.dispatch("fetchCurrentNote", routeId)
         } else {
           const id = store.getters.getIdOfLastNote + 1
-          store.commit("setCurrentNote", { ...store.state.currentNote, id })
+          store.commit("setCurrentNote", { ...store.state.currentNote })
+          store.commit("setCurrentId", id)
         }
       }
       onMounted(fetchNote)
@@ -140,16 +141,16 @@
         router.push("/")
       }
       const clearNote = () => {
-        const id = store.getters.getIdOfLastNote + 1
         store.commit("setCurrentNote", {
           title: "",
-          todos: [] as ToDo[],
-          id: id
+          todos: [] as ToDo[]
         } as Note)
       }
+
       const undo = () => {
         store.commit("undoChanges")
       }
+
       const redo = () => {
         store.commit("redoChanges")
       }
