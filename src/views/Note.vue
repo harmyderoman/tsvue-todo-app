@@ -106,11 +106,7 @@
           store.dispatch("fetchCurrentNote", routeId)
         } else {
           const id = store.getters.getIdOfLastNote + 1
-          store.commit("setCurrentNote", {
-            title: "",
-            todos: [] as ToDo[],
-            id: id
-          })
+          store.commit("setCurrentNote", { ...store.state.currentNote, id })
         }
       }
       onMounted(fetchNote)
