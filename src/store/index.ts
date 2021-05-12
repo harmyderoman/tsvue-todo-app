@@ -41,7 +41,6 @@ export default createStore({
     setCurrentNote(state, payload: Note) {
       state.currentNote.title = payload.title
       state.currentNote.todos = payload.todos
-      clear()
     },
     updateTitle(state, payload: string) {
       state.currentNote.title = payload
@@ -107,9 +106,6 @@ export default createStore({
       }
     },
     canUndo() {
-      // if (history.value.length === 2) {
-      //   return false
-      // }
       return canUndo.value
     },
     canRedo() {

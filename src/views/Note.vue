@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, onMounted, ref } from "vue"
+  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
   import NoteActions from "@/components/NoteActions.vue"
   import Note from "@/models/NoteModel"
@@ -58,7 +58,7 @@
       const note = computed(() => store.state.currentNote)
 
       const { currentRoute } = router
-      const fetchNote = () => {
+      const fetchNote = async () => {
         if (currentRoute.value.params.id) {
           const routeId: number = +currentRoute.value.params.id
           store.dispatch("fetchCurrentNote", routeId)
@@ -67,6 +67,8 @@
           store.commit("setCurrentNote", { ...store.state.currentNote })
           store.commit("setCurrentId", id)
         }
+        await nextTick()
+        store.commit("clearHistory")
       }
       onMounted(fetchNote)
 
