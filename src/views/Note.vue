@@ -45,27 +45,7 @@
       </div>
       <hr />
       <div>
-        <button
-          class="btn btn-primary text-success mr-2 mb-2"
-          type="button"
-          @click="saveNote"
-        >
-          Save
-        </button>
-        <button
-          class="btn btn-primary text-info mr-2 mb-2"
-          type="button"
-          @click="cancelEdit"
-        >
-          Cancel
-        </button>
-        <button
-          class="btn btn-primary text-danger mr-2 mb-2"
-          type="button"
-          @click="DeleteNote"
-        >
-          Delete
-        </button>
+        <note-actions />
       </div>
       <hr />
     </div>
@@ -79,25 +59,18 @@
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
   import router from "@/router"
+  import NoteActions from "@/components/NoteActions.vue"
 
   export default defineComponent({
     name: "Note",
     components: {
-      TodoItem
+      TodoItem,
+      NoteActions
     },
     setup() {
       const note = computed(() => store.state.currentNote)
       const canUndo = computed(() => store.getters.canUndo)
       const canRedo = computed(() => store.getters.canRedo)
-
-      const saveNote = () => {
-        store.dispatch("saveNote")
-        router.push("/")
-      }
-      const DeleteNote = () => {
-        store.commit("deleteNote", note)
-        router.push("/")
-      }
 
       const { currentRoute } = router
       const fetchNote = () => {
@@ -136,10 +109,6 @@
         store.commit("updateTodos", todos)
       }
 
-      const cancelEdit = () => {
-        // undo changes
-        router.push("/")
-      }
       const clearNote = () => {
         store.commit("setCurrentNote", {
           title: "",
@@ -161,12 +130,9 @@
         redo,
         canUndo,
         canRedo,
-        saveNote,
         addNewTodo,
-        cancelEdit,
         onRemoveTodo,
         onUpdateTodo,
-        DeleteNote,
         clearNote,
         updateTitle,
         onCheckboxClick
