@@ -111,11 +111,7 @@
         onUpdateTodo,
         clearNote,
         updateTitle,
-        onCheckboxClick,
-        showModal,
-        confirm,
-        modalTitle,
-        modalText
+        onCheckboxClick
       }
     },
     beforeRouteLeave(to, from, next) {

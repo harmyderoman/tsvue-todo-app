@@ -1,60 +1,78 @@
 <template>
-  <div class="" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="h6 modal-title mb-0" id="modal-title-default">
-            {{ title }}
-          </h2>
-          <button type="button" class="close" aria-label="Close">
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>
-            {{ text }}
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-primary text-success"
-            @click="accept"
-          >
-            Confirm
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary text-danger ml-auto"
-            @click="reject"
-          >
-            Cancel
-          </button>
+  <teleport to="body">
+    <div v-if="showModal" class="modal-backdrop" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <slot name="modal-header">
+              <h2 class="h6 modal-title mb-0" id="modal-title-default">
+                default Title
+              </h2>
+            </slot>
+            <button type="button" class="close" @click="$emit('onClose')">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <slot name="modal-body">
+              <p>
+                default text
+              </p>
+            </slot>
+          </div>
+          <div class="modal-footer">
+            <slot name="modal-actions">
+              <p>No Actions</p>
+            </slot>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </teleport>
 </template>
 
 <script lang="ts">
-  import { defineComponent } from "vue"
+  import { defineComponent, ref, watch } from "vue"
 
+  const props = {
+    show: {
+      type: Boolean,
+      default: false
+    }
+  }
+  const emits = ["onClose"]
+  const components = {}
   export default defineComponent({
-    name: "ModalWindow",
-    props: {
-      title: String,
-      text: String
-    },
-    methods: {
-      close() {
-        this.$emit("close")
-      },
-      accept() {
-        this.$emit("confirm", true)
-      },
-      reject() {
-        this.$emit("confirm", false)
+    name: "ModalDialog",
+    props,
+    emits,
+    components,
+    setup(props) {
+      const showModal = ref(false)
+
+      watch(
+        () => props.show,
+        (show) => {
+          showModal.value = show
+        }
+      )
+
+      return {
+        showModal
       }
     }
   })
 </script>
+
+<style>
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    outline: 0;
+  }
+</style>
