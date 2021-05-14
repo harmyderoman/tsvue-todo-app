@@ -40,6 +40,7 @@
 <script lang="ts">
   import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
+
   import NoteActions from "@/components/NoteActions.vue"
   import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
@@ -110,7 +111,11 @@
         onUpdateTodo,
         clearNote,
         updateTitle,
-        onCheckboxClick
+        onCheckboxClick,
+        showModal,
+        confirm,
+        modalTitle,
+        modalText
       }
     },
     beforeRouteLeave(to, from, next) {

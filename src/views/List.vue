@@ -25,6 +25,10 @@
       </button>
     </div>
   </div>
+  <p v-if="!notes.length">
+    There is no notes right now!<br />
+    Click Create Note button to create one.
+  </p>
 </template>
 
 <script>
