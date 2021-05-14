@@ -34,8 +34,6 @@
 </script>
 
 <style>
-  @import "./assets/css/neumorphism.css";
-
   #app {
     padding: 5px 10px;
     width: 100%;
