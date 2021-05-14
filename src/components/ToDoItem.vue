@@ -1,5 +1,6 @@
 <template>
   <li ref="todoItem" class="card bg-primary border-light shadow-soft">
+
     <div class="todo-body">
       <input v-model="checked" type="checkbox" />
 

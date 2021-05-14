@@ -1,22 +1,7 @@
 <template>
   <div class="card shadow-soft bg-primary border-light p-4 rounded">
     <div>
-      <button
-        class="btn btn-primary text-success mr-2 mb-2"
-        type="button"
-        :disabled="!canUndo"
-        @click="undo"
-      >
-        Undo
-      </button>
-      <button
-        class="btn btn-primary text-info mr-2 mb-2"
-        type="button"
-        @click="redo"
-        :disabled="!canRedo"
-      >
-        Redo
-      </button>
+      <undo-redo-buttons />
     </div>
     <hr />
     <div class="card-body p-0">
@@ -45,81 +30,46 @@
       </div>
       <hr />
       <div>
-        <button
-          class="btn btn-primary text-success mr-2 mb-2"
-          type="button"
-          @click="saveNote"
-        >
-          Save
-        </button>
-        <button
-          class="btn btn-primary text-info mr-2 mb-2"
-          type="button"
-          @click="cancelEdit"
-        >
-          Cancel
-        </button>
-        <button
-          class="btn btn-primary text-danger mr-2 mb-2"
-          type="button"
-          @click="DeleteNote"
-        >
-          Delete
-        </button>
+        <note-actions />
       </div>
       <hr />
     </div>
-    <modal-window
-      :text="modalText"
-      :title="modalTitle"
-      @confirm="confirmFunc"
-    />
   </div>
 </template>
 
 <script lang="ts">
+  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
-  import ModalWindow from "@/components/ModalWindow.vue"
 
-  import { defineComponent, computed, onMounted, ref } from "vue"
+  import NoteActions from "@/components/NoteActions.vue"
   import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
   import router from "@/router"
+  import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
 
   export default defineComponent({
     name: "Note",
     components: {
       TodoItem,
-      ModalWindow
+      NoteActions,
+      UndoRedoButtons
     },
     setup() {
       const note = computed(() => store.state.currentNote)
-      const canUndo = computed(() => store.getters.canUndo)
-      const canRedo = computed(() => store.getters.canRedo)
-
-      const saveNote = () => {
-        store.dispatch("saveNote")
-        router.push("/")
-      }
-      const DeleteNote = () => {
-        store.commit("deleteNote", note)
-        router.push("/")
-      }
 
       const { currentRoute } = router
-      const fetchNote = () => {
+      const fetchNote = async () => {
         if (currentRoute.value.params.id) {
           const routeId: number = +currentRoute.value.params.id
           store.dispatch("fetchCurrentNote", routeId)
         } else {
           const id = store.getters.getIdOfLastNote + 1
-          store.commit("setCurrentNote", {
-            title: "",
-            todos: [] as ToDo[],
-            id: id
-          })
+          store.commit("setCurrentNote", { ...store.state.currentNote })
+          store.commit("setCurrentId", id)
         }
+        await nextTick()
+        store.commit("clearHistory")
       }
       onMounted(fetchNote)
 
@@ -147,53 +97,18 @@
         store.commit("updateTodos", todos)
       }
 
-      const cancelEdit = () => {
-        // undo changes
-        router.push("/")
-      }
       const clearNote = () => {
-        const id = store.getters.getIdOfLastNote + 1
         store.commit("setCurrentNote", {
           title: "",
-          todos: [] as ToDo[],
-          id: id
+          todos: [] as ToDo[]
         } as Note)
-      }
-      const undo = () => {
-        store.commit("undoChanges")
-      }
-      const redo = () => {
-        store.commit("redoChanges")
-      }
-      // Modal Logic
-      const showModal = ref(false)
-      const modalTitle = ref("Title 1")
-      const modalText = ref("Paragraph 1")
-      const confirmFunc = (result: boolean) => {
-        return result
-      }
-
-      const confirm = (text1: string, text2: string, func: Function) => {
-        //show modal true
-        modalTitle.value = text1
-        modalText.value = text2
-        // let result: boolean = await confirmFunc()
-
-        return
       }
 
       return {
         note,
-        undo,
-        redo,
-        canUndo,
-        canRedo,
-        saveNote,
         addNewTodo,
-        cancelEdit,
         onRemoveTodo,
         onUpdateTodo,
-        DeleteNote,
         clearNote,
         updateTitle,
         onCheckboxClick,
