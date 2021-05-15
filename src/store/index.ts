@@ -76,6 +76,8 @@ export default createStore({
   },
   actions: {
     saveNote({ commit }) {
+      const filtredTodos = this.state.currentNote.todos.filter(todo => todo.text != '')
+      commit('updateTodos', filtredTodos)
       const isOldNote: boolean = this.state.notes.some(el => el.id === this.state.currentId)
       if (isOldNote) {
         commit('updateNote')
