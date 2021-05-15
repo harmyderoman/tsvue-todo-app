@@ -1,39 +1,46 @@
 <template>
-  <li ref="todoItem" class="card bg-primary border-light shadow-soft">
-    <div class="todo-body">
-      <input v-model="checked" type="checkbox" />
+  <li
+    ref="todoItem"
+    class="card bg-primary border-light mt-3 p-2 pr-3 shadow-soft"
+  >
+    <div
+      class="d-flex flex-row align-items-center w-100 justify-content-between"
+    >
+      <div class="d-flex flex-row align-items-center pl-2 pr-2 w-100">
+        <input v-model="checked" type="checkbox" />
 
-      <span
-        :class="{ completed: todo.completed && todo.text }"
-        v-if="!editable"
-        @click="editable = !editable"
-      >
-        {{ todo.text ? todo.text : "Click to edit Todo" }}
-      </span>
-      <input
-        class="form-control"
-        v-else
-        type="text"
-        :value="todo.text"
-        @input="onTextChange"
-        @keyup.enter="editable = !editable"
-      />
-    </div>
+        <span
+          :class="{ completed: todo.completed && todo.text }"
+          v-if="!editable"
+          @click="editable = !editable"
+        >
+          {{ todo.text ? todo.text : "Click to edit Todo" }}
+        </span>
+        <input
+          class="form-control todo-text-input"
+          v-else
+          type="text"
+          :value="todo.text"
+          @input="onTextChange"
+          @keyup.enter="editable = !editable"
+        />
+      </div>
 
-    <div class="todo-actions">
-      <button
-        class="btn btn-sm btn-primary  mr-3"
-        @click="editable = !editable"
-        :class="{ 'text-info': editable }"
-      >
-        {{ editable ? "Save" : "Edit" }}
-      </button>
-      <button
-        class="btn btn-sm btn-primary text-danger mr-3"
-        @click="$emit('remove-todo', todo)"
-      >
-        Delete
-      </button>
+      <div class="d-flex flex-row align-items-center pl-2 pr-2">
+        <button
+          class="btn btn-sm btn-primary"
+          @click="editable = !editable"
+          :class="{ 'text-info': editable }"
+        >
+          {{ editable ? "Save" : "Edit" }}
+        </button>
+        <button
+          class="btn btn-sm btn-primary text-danger ml-2"
+          @click="$emit('remove-todo', todo)"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   </li>
 </template>
@@ -81,20 +88,10 @@
   })
 </script>
 
-<style scoped>
+<style>
   span {
     word-wrap: none;
     padding-left: 10px;
-  }
-  li {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    padding-top: 0px;
-    padding-left: 10px;
-    padding-right: 15px;
-    height: 60px;
-    margin: 10px 0px;
   }
   .completed {
     text-decoration: line-through;
@@ -104,17 +101,10 @@
     height: 20px;
     margin-right: 10px;
   }
-  input[type="text"] {
-    width: auto;
-    max-width: 300px;
-    height: 30px;
-    padding: 0px 10px;
-    border: none;
-    border-radius: 5px;
-  }
-  div {
-    display: flex;
-    justify-content: flex-start;
+  .todo-text-input {
+    height: 32px !important;
+    border: none !important;
+    border-radius: 5px !important;
   }
   .todo-body {
     display: flex;
@@ -131,11 +121,8 @@
     li {
       padding-right: 0;
     }
-    input[type="text"] {
-      max-width: 150px;
-    }
-    input[type="text"] {
-      max-width: 150px;
+    .todo-text-input {
+      max-width: 300px;
     }
     input[type="checkbox"] {
       margin-right: 5px;
