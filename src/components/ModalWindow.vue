@@ -4,21 +4,20 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow-soft">
           <div class="modal-header">
-            <slot name="modal-header">
-              <h2 class="h6 modal-title mb-0" id="modal-title-default">
-                default Title
-              </h2>
-            </slot>
+            <h2 class="h6 modal-title mb-0">
+              <slot name="modal-header"> default Title</slot>
+            </h2>
+
             <button type="button" class="close" @click="$emit('onClose')">
               <span aria-hidden="true">×</span>
             </button>
           </div>
           <div class="modal-body">
-            <slot name="modal-body">
-              <p>
+            <p>
+              <slot name="modal-body">
                 default text
-              </p>
-            </slot>
+              </slot>
+            </p>
           </div>
           <div class="modal-footer">
             <slot name="modal-actions">

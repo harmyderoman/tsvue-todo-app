@@ -22,12 +22,10 @@
   </button>
   <modal-window :show="showModal" @onClose="closeModal">
     <template v-slot:modal-header>
-      <h2 class="h6 modal-title mb-0" id="modal-title-default">
-        {{ modalTitle }}
-      </h2>
+      {{ modalTitle }}
     </template>
     <template v-slot:modal-body>
-      <p>{{ modalBody }}</p>
+      {{ modalBody }}
     </template>
     <template v-slot:modal-actions
       ><button
@@ -125,7 +123,7 @@
         store.dispatch("saveNote")
       }
       const deleteNote = () => {
-        store.commit("deleteNote", note)
+        store.commit("deleteNote")
         router.push("/")
       }
       const cancelEdit = () => {
