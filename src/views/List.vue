@@ -8,7 +8,7 @@
   >
     <div class="card-body">
       <h2>{{ note.title }}</h2>
-      <ul>
+      <ul class="pl-3">
         <li
           :class="{ completed: todo.completed }"
           v-for="(todo, index) in note.todos"
