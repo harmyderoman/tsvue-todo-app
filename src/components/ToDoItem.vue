@@ -1,6 +1,5 @@
 <template>
   <li ref="todoItem" class="card bg-primary border-light shadow-soft">
-
     <div class="todo-body">
       <input v-model="checked" type="checkbox" />
 
@@ -96,8 +95,6 @@
     padding-right: 15px;
     height: 60px;
     margin: 10px 0px;
-    /**background-color: #e2e2e2;
-    border-radius: 5px;*/
   }
   .completed {
     text-decoration: line-through;
@@ -114,8 +111,6 @@
     padding: 0px 10px;
     border: none;
     border-radius: 5px;
-    /**font-family: cursive, sans-serif;
-    color: #8a8a8a;*/
   }
   div {
     display: flex;

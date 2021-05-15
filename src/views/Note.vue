@@ -5,14 +5,15 @@
     </div>
     <hr />
     <div class="card-body p-0">
-      <input
+      <note-title :title="note.title" @update-title="updateTitle" />
+      <!-- <input
         class="form-control"
         :value="note.title"
         @input="updateTitle"
         placeholder="Enter Title"
-      />
-      <h2>{{ note.title }}</h2>
-      <!-- <hr /> -->
+      /> -->
+      <!-- <h2>{{ note.title }}</h2> -->
+      <hr />
       <ul>
         <TodoItem
           v-for="(todo, index) in note.todos"
@@ -47,13 +48,15 @@
   import store from "@/store"
   import router from "@/router"
   import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
+  import NoteTitle from "@/components/NoteTitle.vue"
 
   export default defineComponent({
     name: "Note",
     components: {
       TodoItem,
       NoteActions,
-      UndoRedoButtons
+      UndoRedoButtons,
+      NoteTitle
     },
     setup() {
       const note = computed(() => store.state.currentNote)
@@ -73,8 +76,8 @@
       }
       onMounted(fetchNote)
 
-      const updateTitle = (e: { target: { value: string } }) => {
-        store.commit("updateTitle", e.target.value)
+      const updateTitle = (title: string) => {
+        store.commit("updateTitle", title)
       }
 
       const addNewTodo = () => {
