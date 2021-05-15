@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, ref } from "vue"
+  import { defineComponent, ref } from "vue"
   import store from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
@@ -58,7 +58,7 @@
       ModalWindow
     },
     setup() {
-      const note = computed(() => store.state.currentNote)
+      // const note = computed(() => store.state.currentNote)
 
       const showModal = ref(false)
       const modalTitle = ref("Modal Title")
