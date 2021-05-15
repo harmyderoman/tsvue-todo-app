@@ -3,6 +3,7 @@
     <div>
       <undo-redo-buttons />
     </div>
+    <hr />
     <div class="card-body p-0">
       <note-title :title="note.title" @update-title="updateTitle" />
 
