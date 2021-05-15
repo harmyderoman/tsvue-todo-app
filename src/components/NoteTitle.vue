@@ -27,7 +27,7 @@
     },
     setup() {
       const titleRef = ref(null)
-      const editable = ref(true)
+      const editable = ref(false)
 
       onClickOutside(titleRef, () => {
         if (editable.value) {

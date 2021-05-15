@@ -3,16 +3,9 @@
     <div>
       <undo-redo-buttons />
     </div>
-    <hr />
     <div class="card-body p-0">
       <note-title :title="note.title" @update-title="updateTitle" />
-      <!-- <input
-        class="form-control"
-        :value="note.title"
-        @input="updateTitle"
-        placeholder="Enter Title"
-      /> -->
-      <!-- <h2>{{ note.title }}</h2> -->
+
       <hr />
       <ul>
         <TodoItem
