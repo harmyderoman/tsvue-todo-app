@@ -65,13 +65,8 @@
 
 <style>
   .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1050;
-    width: 100%;
-    height: 100%;
     overflow: hidden;
     outline: 0;
+    background-color: #e6e7eec0 !important;
   }
 </style>

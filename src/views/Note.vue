@@ -1,13 +1,12 @@
 <template>
   <div class="card shadow-soft bg-primary border-light p-4 rounded">
-    <div>
-      <undo-redo-buttons />
+    <div class="d-flex justify-content-start mb-3">
+      <div class="col"><undo-redo-buttons /></div>
     </div>
-    <hr />
-    <div class="card-body p-0">
+
+    <div class="card bg-primary border-light shadow-soft p-4">
       <note-title :title="note.title" @update-title="updateTitle" />
 
-      <hr />
       <ul>
         <TodoItem
           v-for="(todo, index) in note.todos"
@@ -18,16 +17,16 @@
           @checkbox-click="onCheckboxClick($event, index)"
         />
       </ul>
+
       <div>
         <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
           Add Todo
         </button>
       </div>
-      <hr />
-      <div>
-        <note-actions />
-      </div>
-      <hr />
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+      <note-actions />
     </div>
   </div>
 </template>
