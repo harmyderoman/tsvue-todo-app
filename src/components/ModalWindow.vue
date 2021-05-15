@@ -2,7 +2,7 @@
   <teleport to="body">
     <div v-if="showModal" class="modal-backdrop" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content shadow-soft">
           <div class="modal-header">
             <slot name="modal-header">
               <h2 class="h6 modal-title mb-0" id="modal-title-default">
