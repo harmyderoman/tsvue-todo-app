@@ -20,6 +20,15 @@
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
-    "typescript": "~3.9.3"
+    "@vue/test-utils": "^2.0.0-rc.10",
+    "typescript": "~3.9.3",
+    "vue-jest": "^3.0.7"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js", "json", "vue"],
+    "transform": {
+      "^.+\\.js$": "babel-jest",
+      "^.+\\.vue$": "vue-jest"
+    }
   }
 }
