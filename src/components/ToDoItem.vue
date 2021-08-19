@@ -7,7 +7,7 @@
       class="d-flex flex-row align-items-center w-100 justify-content-between"
     >
       <div class="d-flex flex-row align-items-center pl-2 pr-2 w-100">
-        <input v-model="checked" type="checkbox" />
+        <input v-model="todo.completed" type="checkbox" />
 
         <span
           :class="{ completed: todo.completed && todo.text }"
@@ -20,8 +20,7 @@
           class="form-control todo-text-input"
           v-else
           type="text"
-          :value="todo.text"
-          @input="onTextChange"
+          v-model="todo.text"
           @keyup.enter="editable = !editable"
         />
       </div>
@@ -69,21 +68,6 @@
       })
 
       return { todoItem, editable }
-    },
-    methods: {
-      onTextChange(e: { target: { value: string } }) {
-        this.$emit("update-todo", e.target.value)
-      }
-    },
-    computed: {
-      checked: {
-        get(): boolean {
-          return this.todo.completed
-        },
-        set(value: boolean) {
-          this.$emit("checkbox-click", value)
-        }
-      }
     }
   })
 </script>

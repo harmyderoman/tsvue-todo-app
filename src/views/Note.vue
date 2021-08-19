@@ -13,8 +13,6 @@
           :todo="todo"
           :key="index"
           @remove-todo="onRemoveTodo(index)"
-          @update-todo="onUpdateTodo($event, index)"
-          @checkbox-click="onCheckboxClick($event, index)"
         />
       </ul>
 
