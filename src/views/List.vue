@@ -68,11 +68,13 @@
   import ModalWindow from "@/components/ModalWindow.vue"
   import store from "@/store"
   import { defineComponent, computed, ref } from "vue"
+  import { useGlobalNotes, addNote } from "@/state"
 
   export default defineComponent({
     components: { ModalWindow },
     setup() {
-      const notes = computed(() => store.state.notes)
+      // const notes = computed(() => store.state.notes)
+      const notes = useGlobalNotes()
 
       const showModal = ref(false)
 
