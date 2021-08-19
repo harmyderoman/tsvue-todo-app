@@ -51,6 +51,7 @@
   import store from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
+  import { useGlobalCurrentNote, addNote } from "@/state"
 
   export default defineComponent({
     name: "NoteActions",
@@ -120,7 +121,8 @@
       }
 
       const saveNote = () => {
-        store.dispatch("saveNote")
+        // store.dispatch("saveNote")
+        addNote()
       }
       const deleteNote = () => {
         store.commit("deleteNote")
