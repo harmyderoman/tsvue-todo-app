@@ -53,7 +53,7 @@
   import ModalWindow from "./ModalWindow.vue"
   import {
     useGlobalCurrentNote,
-    addNote,
+    updateNote,
     currentNoteId,
     deleteGlobalNote
   } from "@/state"
@@ -127,7 +127,7 @@
 
       const saveNote = () => {
         // store.dispatch("saveNote")
-        addNote()
+        updateNote()
       }
       const deleteNote = () => {
         // store.commit("deleteNote")

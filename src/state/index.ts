@@ -1,4 +1,4 @@
-import { createGlobalState, useStorage, useRefHistory } from '@vueuse/core'
+import { createGlobalState, useStorage } from '@vueuse/core'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
 import { ref, computed } from 'vue'
@@ -26,9 +26,12 @@ export const addNote = function () {
 
 export const updateNote = function () {
   let note = notes.value.find(note => note.id === currentNoteId.value)
-  let index = notes.value.indexOf(note as Note)
-  // const id = currentNoteId.value
-  notes.value[index] = { id: currentNoteId.value, ...currentNote }
+  if (note) {
+    let index = notes.value.indexOf(note as Note)
+    notes.value[index] = { id: currentNoteId.value, ...currentNote }
+  } else {
+    addNote()
+  }
 }
 
 export const deleteGlobalNote = function (noteId: number) {

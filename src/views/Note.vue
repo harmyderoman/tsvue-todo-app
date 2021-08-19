@@ -44,9 +44,9 @@
     useGlobalCurrentNote,
     useGlobalNotes,
     currentNoteId,
-    addNote,
     getIdOfLastNote
   } from "@/state"
+  import { useRefHistory } from "@vueuse/core"
 
   export default defineComponent({
     name: "Note",
@@ -57,8 +57,10 @@
       NoteTitle
     },
     setup() {
-      let note = useGlobalCurrentNote()
+      const note = useGlobalCurrentNote()
       const notes = useGlobalNotes()
+
+      // const { history, undo, redo } = useRefHistory(note)
 
       const { currentRoute } = router
       const fetchNote = async () => {
@@ -110,10 +112,14 @@
       }
 
       const clearNote = () => {
-        store.commit("setCurrentNote", {
-          title: "",
-          todos: [] as ToDo[]
-        } as Note)
+        note.todos = []
+        note.title = ""
+        currentNoteId.value = getIdOfLastNote.value + 1
+
+        // store.commit("setCurrentNote", {
+        //   title: "",
+        //   todos: [] as ToDo[]
+        // } as Note)
       }
 
       return {
