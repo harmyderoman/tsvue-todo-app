@@ -1,5 +1,10 @@
 <template>
-  <h3 v-if="!editable" @click="editable = !editable" class="title-font">
+  <h3
+    v-if="!editable"
+    @click="editable = !editable"
+    :class="{ notitle: !title }"
+    class="title-font"
+  >
     {{ title ? title : "Click to edit Title" }}
   </h3>
   <input
@@ -45,10 +50,16 @@
   })
 </script>
 
-<style scoped>
+<style>
   .title-font {
     font-size: calc(1.3rem + 0.6vw) !important;
     font-weight: 400 !important;
     padding: 0.83rem !important;
+  }
+  .notitle {
+    font-size: 20px !important;
+    border: 1px dashed grey;
+    font-style: italic;
+    border-radius: 10px;
   }
 </style>

@@ -51,7 +51,12 @@
   import store from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
-  import { useGlobalCurrentNote, addNote } from "@/state"
+  import {
+    useGlobalCurrentNote,
+    addNote,
+    currentNoteId,
+    deleteGlobalNote
+  } from "@/state"
 
   export default defineComponent({
     name: "NoteActions",
@@ -125,7 +130,8 @@
         addNote()
       }
       const deleteNote = () => {
-        store.commit("deleteNote")
+        // store.commit("deleteNote")
+        deleteGlobalNote(currentNoteId.value)
         router.push("/")
       }
       const cancelEdit = () => {

@@ -68,7 +68,12 @@
   import ModalWindow from "@/components/ModalWindow.vue"
   import store from "@/store"
   import { defineComponent, computed, ref } from "vue"
-  import { useGlobalNotes, addNote } from "@/state"
+  import {
+    useGlobalNotes,
+    addNote,
+    deleteGlobalNote,
+    currentNoteId
+  } from "@/state"
 
   export default defineComponent({
     components: { ModalWindow },
@@ -80,11 +85,13 @@
 
       const onDeleteNote = (noteId: number) => {
         showModal.value = true
-        store.commit("setCurrentId", noteId)
+        // store.commit("setCurrentId", noteId)
+        currentNoteId.value = noteId
       }
       const confirmDelete = (permission: boolean): void => {
         if (permission) {
-          store.commit("deleteNote")
+          // store.commit("deleteNote")
+          deleteGlobalNote(currentNoteId.value)
         }
         closeModal()
       }

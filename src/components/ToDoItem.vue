@@ -1,7 +1,7 @@
 <template>
   <li
     ref="todoItem"
-    class="card bg-primary border-light mt-3 p-2 pr-3 shadow-soft"
+    class="card shadow-inset bg-primary border-light mt-3 p-2 pr-3 shadow-soft"
   >
     <div
       class="d-flex flex-row align-items-center w-100 justify-content-between"
@@ -35,7 +35,7 @@
         </button>
         <button
           class="btn btn-sm btn-primary text-danger ml-2"
-          @click="$emit('remove-todo', todo)"
+          @click="$emit('remove-todo')"
         >
           Delete
         </button>
