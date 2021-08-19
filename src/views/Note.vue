@@ -42,6 +42,7 @@
   import router from "@/router"
   import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
   import NoteTitle from "@/components/NoteTitle.vue"
+  import { useGlobalCurrentNote, addNote } from "@/state"
 
   export default defineComponent({
     name: "Note",
@@ -52,7 +53,7 @@
       NoteTitle
     },
     setup() {
-      const note = computed(() => store.state.currentNote)
+      const note = useGlobalCurrentNote()
 
       const { currentRoute } = router
       const fetchNote = async () => {
@@ -70,11 +71,13 @@
       onMounted(fetchNote)
 
       const updateTitle = (title: string) => {
-        store.commit("updateTitle", title)
+        // store.commit("updateTitle", title)
+        note.title = title
       }
 
       const addNewTodo = () => {
-        store.commit("addNewTodo")
+        // store.commit("addNewTodo")
+        note.todos.push({} as ToDo)
       }
 
       const onRemoveTodo = (index: number) => {
