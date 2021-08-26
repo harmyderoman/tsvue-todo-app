@@ -1,7 +1,24 @@
 <template>
   <div class="card shadow-inset bg-primary border-light p-4 rounded">
     <div class="d-flex justify-content-start mb-3">
-      <div class="col"><undo-redo-buttons /></div>
+      <div class="col">
+        <button
+          class="btn btn-primary text-success mr-2 mb-2"
+          type="button"
+          @click="undo"
+          :disabled="!canUndo"
+        >
+          Undo
+        </button>
+        <button
+          class="btn btn-primary text-info mr-2 mb-2"
+          type="button"
+          @click="redo"
+          :disabled="!canRedo"
+        >
+          Redo
+        </button>
+      </div>
     </div>
 
     <div class="card bg-primary border-light shadow-soft p-4">
@@ -17,8 +34,8 @@
       </ul>
 
       <div>
-        <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
-          Add Todo
+        <button class="btn btn-primary text-info ml-2 mb-2" @click="addNewTodo">
+          Add New Todo
         </button>
       </div>
     </div>
@@ -30,22 +47,19 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
+  import { defineComponent, onMounted, nextTick } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
 
   import NoteActions from "@/components/NoteActions.vue"
-  import Note from "@/models/NoteModel"
   import ToDo from "@/models/ToDoModel"
-  import store from "@/store"
   import router from "@/router"
-  import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
   import NoteTitle from "@/components/NoteTitle.vue"
   import {
-    useGlobalCurrentNote,
     useGlobalNotes,
     currentNoteId,
-    getIdOfLastNote
-  } from "@/state"
+    getIdOfLastNote,
+    currentNote
+  } from "@/store"
   import { useRefHistory } from "@vueuse/core"
 
   export default defineComponent({
@@ -53,87 +67,75 @@
     components: {
       TodoItem,
       NoteActions,
-      UndoRedoButtons,
       NoteTitle
     },
     setup() {
-      const note = useGlobalCurrentNote()
       const notes = useGlobalNotes()
 
-      // const { history, undo, redo } = useRefHistory(note)
+      const note = currentNote
+      const {
+        history,
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        clear
+      } = useRefHistory(note, { deep: true })
 
       const { currentRoute } = router
       const fetchNote = async () => {
         if (currentRoute.value.params.id) {
           const routeId: number = +currentRoute.value.params.id
           currentNoteId.value = routeId
-          // store.dispatch("fetchCurrentNote", routeId)
           const fetchedNote = notes.value.find((note) => note.id === routeId)
           if (fetchedNote) {
-            note.title = fetchedNote.title
-            note.todos = fetchedNote.todos
+            note.value.title = fetchedNote.title
+            note.value.todos = fetchedNote.todos
           }
         } else {
-          // const id = getIdOfLastNote.value + 1
-          // store.commit("setCurrentNote", { ...store.state.currentNote })
-          note.title = ""
-          note.todos = [] as ToDo[]
-          // store.commit("setCurrentId", id)
+          note.value.title = ""
+          note.value.todos = [] as ToDo[]
           currentNoteId.value = getIdOfLastNote.value + 1
         }
         await nextTick()
-        // store.commit("clearHistory")
+        clear()
       }
       onMounted(fetchNote)
 
       const updateTitle = (title: string) => {
-        // store.commit("updateTitle", title)
-        note.title = title
+        note.value.title = title
       }
 
       const addNewTodo = () => {
-        // store.commit("addNewTodo")
-        note.todos.push({} as ToDo)
+        note.value.todos.push({} as ToDo)
       }
 
       const onRemoveTodo = (index: number) => {
-        // store.commit("deleteTodo", index)
-        note.todos.splice(index, 1)
-      }
-      const onUpdateTodo = (text: string, index: number) => {
-        // let todos = [...store.state.currentNote.todos]
-        // todos[index] = { ...todos[index], text }
-        // store.commit("updateTodos", todos)
-      }
-      const onCheckboxClick = (completed: boolean, index: number) => {
-        // let todos = [...store.state.currentNote.todos]
-        // todos[index] = { ...todos[index], completed }
-        // store.commit("updateTodos", todos)
+        note.value.todos.splice(index, 1)
       }
 
       const clearNote = () => {
-        note.todos = []
-        note.title = ""
+        note.value.todos = []
+        note.value.title = ""
         currentNoteId.value = getIdOfLastNote.value + 1
-
-        // store.commit("setCurrentNote", {
-        //   title: "",
-        //   todos: [] as ToDo[]
-        // } as Note)
       }
 
       return {
         note,
         addNewTodo,
         onRemoveTodo,
-        onUpdateTodo,
         clearNote,
         updateTitle,
-        onCheckboxClick
+        undo,
+        redo,
+        canUndo,
+        canRedo,
+        clear
       }
     },
     beforeRouteLeave(to, from, next) {
       this.clearNote()
+      this.clear()
       next()
     }
   })

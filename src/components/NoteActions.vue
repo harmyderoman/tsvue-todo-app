@@ -48,15 +48,9 @@
 
 <script lang="ts">
   import { defineComponent, ref } from "vue"
-  import store from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
-  import {
-    useGlobalCurrentNote,
-    updateNote,
-    currentNoteId,
-    deleteGlobalNote
-  } from "@/state"
+  import { updateNote, currentNoteId, deleteGlobalNote } from "@/store"
 
   export default defineComponent({
     name: "NoteActions",
@@ -64,8 +58,6 @@
       ModalWindow
     },
     setup() {
-      // const note = computed(() => store.state.currentNote)
-
       const showModal = ref(false)
       const modalTitle = ref("Modal Title")
       const modalBody = ref("Modal Body")
@@ -126,11 +118,9 @@
       }
 
       const saveNote = () => {
-        // store.dispatch("saveNote")
         updateNote()
       }
       const deleteNote = () => {
-        // store.commit("deleteNote")
         deleteGlobalNote(currentNoteId.value)
         router.push("/")
       }

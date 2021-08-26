@@ -1,119 +1,58 @@
-import { createStore } from 'vuex'
+
+import { createGlobalState, useStorage } from '@vueuse/core'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
-import { useStorage, useRefHistory } from '@vueuse/core'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-const localStorageNotes: any = useStorage('my-notes', [] as Note[])
-const note: any = ref({
+// state
+export const useGlobalNotes = createGlobalState(
+  () => useStorage('my-notes', [] as Note[]),
+)
+
+export const currentNote = ref({
   title: "",
   todos: [] as ToDo[]
 })
-const { history, undo, redo, canUndo, canRedo, clear } = useRefHistory(note, {
-  deep: true
-})
 
-export default createStore({
-  state: {
-    notes: localStorageNotes as Note[],
-    currentNote: note as Note,
-    currentId: 0
-  },
-  mutations: {
-    // Notes
+export const currentNoteId = ref(0)
 
-    addNote(state) {
-      const id = state.currentId
-      state.notes.push({ ...state.currentNote, id })
-    },
-    deleteNote(state) {
-      state.notes = state.notes.filter(note => note.id != state.currentId)
-    },
-    updateNote(state) {
-      let note = state.notes.find(note => note.id === state.currentId)
-      let index = state.notes.indexOf(note as Note)
-      const id = state.currentId
-      state.notes[index] = { ...state.currentNote, id }
-    },
+// actions
 
+const notes = useGlobalNotes() // for local use
 
-    // Current Note 
-    setCurrentNote(state, payload: Note) {
-      state.currentNote.title = payload.title
-      state.currentNote.todos = payload.todos
-    },
-    updateTitle(state, payload: string) {
-      state.currentNote.title = payload
-    },
-    updateTodos(state, payload: ToDo[]) {
-      state.currentNote.todos = payload
-    },
-    addNewTodo(state) {
-      state.currentNote.todos.push({
-        text: "",
-        completed: false
-      })
-    },
-    deleteTodo(state, index: number) {
-      state.currentNote.todos.splice(index, 1)
-    },
+const filterEmptyTodos = function () {
+  currentNote.value.todos = currentNote.value.todos.filter(todo => todo.text)
+}
 
-    // History
-    clearHistory() {
-      clear()
-    },
-    undoChanges() {
-      undo()
-    },
-    redoChanges() {
-      redo()
-    },
+export const addNote = function () {
+  notes.value.push({ id: currentNoteId.value, ...currentNote.value })
+}
 
-    // Current Id
-    setCurrentId(state, payload: number) {
-      state.currentId = payload
-    },
-  },
-  actions: {
-    saveNote({ commit }) {
-      const filtredTodos = this.state.currentNote.todos.filter(todo => todo.text != '')
-      commit('updateTodos', filtredTodos)
-      const isOldNote: boolean = this.state.notes.some(el => el.id === this.state.currentId)
-      if (isOldNote) {
-        commit('updateNote')
-      }
-      else {
-        commit('addNote');
-      }
+export const updateNote = function () {
 
-    },
-    fetchCurrentNote({ commit }, noteId: number) {
-      let note = JSON.parse(JSON.stringify(this.state.notes.find(note => note.id === noteId)))
-      commit('setCurrentNote', note)
-      commit('setCurrentId', noteId)
-    },
-    updateCurrentNote({ commit }, note: Note) {
-      commit('setCurrentNote', note)
-    }
+  let note = notes.value.find(note => note.id === currentNoteId.value)
 
-  },
-  getters: {
-    getIdOfLastNote(state): number {
-      if (state.notes.length > 0) {
-        const index = state.notes.length - 1
+  if (note) {
+    filterEmptyTodos()
+    let index = notes.value.indexOf(note as Note)
+    notes.value[index] = { id: currentNoteId.value, ...currentNote.value }
+  } else {
 
-        return state.notes[index].id
-      } else {
-        return 0
-      }
-    },
-    canUndo() {
-      return canUndo.value
-    },
-    canRedo() {
-      return canRedo.value
-    }
-  },
-  strict: true
+    filterEmptyTodos()
+    addNote()
+  }
+}
 
+export const deleteGlobalNote = function (noteId: number) {
+  notes.value = notes.value.filter(note => note.id != noteId)
+}
+
+// getters
+export const getIdOfLastNote = computed(() => {
+  if (notes.value.length) {
+    const index = notes.value.length - 1
+    return notes.value[index].id
+  } else {
+    return 0
+  }
 })

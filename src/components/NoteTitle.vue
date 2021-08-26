@@ -5,7 +5,7 @@
     :class="{ notitle: !title }"
     class="title-font"
   >
-    {{ title ? title : "Click to edit Title" }}
+    {{ title ? title : "Click here to write a title" }}
   </h3>
   <input
     ref="titleRef"
