@@ -1,10 +1,10 @@
 import { createStore } from 'vuex'
+import createPersistedState from "vuex-persistedstate";
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
-import { useStorage, useRefHistory } from '@vueuse/core'
+import { useRefHistory } from '@vueuse/core'
 import { ref } from 'vue'
 
-const localStorageNotes: any = useStorage('my-notes', [] as Note[])
 const note: any = ref({
   title: "",
   todos: [] as ToDo[]
@@ -15,7 +15,7 @@ const { history, undo, redo, canUndo, canRedo, clear } = useRefHistory(note, {
 
 export default createStore({
   state: {
-    notes: localStorageNotes as Note[],
+    notes: [] as Note[],
     currentNote: note as Note,
     currentId: 0
   },
@@ -114,6 +114,7 @@ export default createStore({
       return canRedo.value
     }
   },
-  strict: true
+  strict: true,
+  plugins: [createPersistedState()],
 
 })
