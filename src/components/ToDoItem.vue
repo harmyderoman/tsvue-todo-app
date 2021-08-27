@@ -1,7 +1,7 @@
 <template>
   <li
     ref="todoItem"
-    class="card bg-primary border-light mt-3 p-2 pr-3 shadow-soft"
+    class="card bg-primary border-light mt-3 p-2 pr-3 shadow-inset"
   >
     <div
       class="d-flex flex-row align-items-center w-100 justify-content-between"

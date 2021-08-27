@@ -1,5 +1,5 @@
 <template>
-  <div class="card shadow-soft bg-primary border-light p-4 rounded">
+  <div class="card shadow-inset bg-primary border-light p-4 rounded">
     <div class="d-flex justify-content-start mb-3">
       <div class="col"><undo-redo-buttons /></div>
     </div>
