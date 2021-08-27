@@ -112,6 +112,7 @@
     },
     beforeRouteLeave(to, from, next) {
       this.clearNote()
+      store.commit("setCurrentId", store.getters.getIdOfLastNote + 1)
       next()
     }
   })
