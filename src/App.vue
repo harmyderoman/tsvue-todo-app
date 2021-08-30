@@ -45,4 +45,7 @@
       padding: 0px 5px;
     }
   }
+  .router-link-exact-active {
+    cursor: auto !important;
+  }
 </style>
