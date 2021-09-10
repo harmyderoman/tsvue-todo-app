@@ -47,7 +47,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, nextTick } from "vue"
+  import { defineComponent, onMounted, nextTick, onUnmounted } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
 
   import NoteActions from "@/components/NoteActions.vue"
@@ -62,6 +62,8 @@
   } from "@/store"
   import { useRefHistory } from "@vueuse/core"
 
+  import { useDebouncedRefHistory } from "@/composables/useDebounceRefHistory"
+
   export default defineComponent({
     name: "Note",
     components: {
@@ -73,6 +75,14 @@
       const notes = useGlobalNotes()
 
       const note = currentNote
+      // const {
+      //   history,
+      //   undo,
+      //   redo,
+      //   canUndo,
+      //   canRedo,
+      //   clear
+      // } = useRefHistory(note, { deep: true })
       const {
         history,
         undo,
@@ -80,7 +90,7 @@
         canUndo,
         canRedo,
         clear
-      } = useRefHistory(note, { deep: true })
+      } = useDebouncedRefHistory(note, { deep: true, clone: true }, 1000)
 
       const { currentRoute } = router
       const fetchNote = async () => {
@@ -101,6 +111,7 @@
         clear()
       }
       onMounted(fetchNote)
+      onUnmounted(clear)
 
       const updateTitle = (title: string) => {
         note.value.title = title
