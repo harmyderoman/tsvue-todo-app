@@ -1,4 +1,4 @@
-import { Fn, pausableFilter, ignorableWatch } from '@vueuse/shared'
+import { Fn, pausableFilter, ignorableWatch, debounceFilter, throttleFilter } from '@vueuse/shared'
 import { Ref } from 'vue'
 import { useManualRefHistory, useDebounceFn } from '@vueuse/core'
 
@@ -7,9 +7,10 @@ export function useDebouncedRefHistory(source: any, options: any, ms: number) {
   const {
     deep = false,
     flush = 'pre',
+    // eventFilter: userFilter
   } = options
 
-  const { eventFilter, pause, resume: resumeTracking, isActive: isTracking } = pausableFilter()
+  const { eventFilter, pause, resume: resumeTracking, isActive: isTracking } = pausableFilter(debounceFilter(ms))
   const { ignoreUpdates, ignorePrevAsyncUpdates, stop } = ignorableWatch(
     source,
     commit,
@@ -36,10 +37,10 @@ export function useDebouncedRefHistory(source: any, options: any, ms: number) {
 
   const { clear, commit: manualCommit } = manualHistory
 
-  const debounsedCommit = useDebounceFn(() => {
-    console.log('debounce commit')
-    manualCommit()
-  }, ms)
+  // const debounsedCommit = useDebounceFn(() => {
+  //   console.log('debounce commit')
+  //   manualCommit()
+  // }, ms)
 
   function commit() {
 
@@ -48,10 +49,11 @@ export function useDebouncedRefHistory(source: any, options: any, ms: number) {
     // so we do not trigger an extra commit in the async watcher
 
     console.log('commit')
-    pause()
+    // pause()
     ignorePrevAsyncUpdates()
-    debounsedCommit()
-    resume()
+    manualCommit()
+    // debounsedCommit()
+    // resume()
     // manualCommit()
   }
   // function commit() 
