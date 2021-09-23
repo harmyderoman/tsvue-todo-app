@@ -20,7 +20,7 @@
   >
     Delete
   </button>
-  <modal-window :show="showModal" @onClose="closeModal">
+  <modal-window ref="focusTarget" :show="showModal" @onClose="closeModal">
     <template v-slot:modal-header>
       {{ modalTitle }}
     </template>
@@ -51,6 +51,7 @@
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
   import { updateNote, currentNoteId, deleteGlobalNote } from "@/store"
+  import { useFocusTrap } from "@vueuse/integrations/useFocusTrap"
 
   export default defineComponent({
     name: "NoteActions",
@@ -62,6 +63,12 @@
       const modalTitle = ref("Modal Title")
       const modalBody = ref("Modal Body")
       const action = ref("")
+      const focusTarget = ref()
+      const {
+        hasFocus,
+        activate: activateFocus,
+        deactivate: deactivateFocus
+      } = useFocusTrap(focusTarget)
 
       const Confirm = (permission: boolean) => {
         if (permission) {
@@ -87,6 +94,7 @@
       const callModalDialog = (value: string) => {
         action.value = value
         showModal.value = true
+        activateFocus()
         switch (value) {
           case "delete":
             modalTitle.value = "Do you realy want to delete this Note?"
@@ -111,6 +119,7 @@
         }
       }
       const closeModal = () => {
+        deactivateFocus()
         showModal.value = false
         action.value = ""
         modalTitle.value = ""

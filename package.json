@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^4.9.0",
+    "@vueuse/integrations": "^6.4.1",
     "core-js": "^3.6.5",
     "vue": "^3.0.6",
     "vue-router": "^4.0.0-0",
