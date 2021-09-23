@@ -75,14 +75,6 @@
       const notes = useGlobalNotes()
 
       const note = currentNote
-      // const {
-      //   history,
-      //   undo,
-      //   redo,
-      //   canUndo,
-      //   canRedo,
-      //   clear
-      // } = useRefHistory(note, { deep: true })
       const {
         history,
         undo,

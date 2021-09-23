@@ -37,7 +37,7 @@ export function useDebouncedRefHistory(source: any, options: any, ms: number) {
 
   const { clear, commit: manualCommit } = manualHistory
 
-  // const debounsedCommit = useDebounceFn(() => {
+  // const debouncedCommit = useDebounceFn(() => {
   //   console.log('debounce commit')
   //   manualCommit()
   // }, ms)
@@ -52,7 +52,7 @@ export function useDebouncedRefHistory(source: any, options: any, ms: number) {
     // pause()
     ignorePrevAsyncUpdates()
     manualCommit()
-    // debounsedCommit()
+    // debouncedCommit()
     // resume()
     // manualCommit()
   }
