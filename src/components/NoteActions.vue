@@ -27,8 +27,8 @@
     <template v-slot:modal-body>
       {{ modalBody }}
     </template>
-    <template v-slot:modal-actions
-      ><button
+    <template v-slot:modal-actions>
+      <button
         type="button"
         class="btn btn-primary text-success"
         @click="Confirm(true)"
@@ -41,8 +41,8 @@
         @click="Confirm(false)"
       >
         Cancel
-      </button></template
-    >
+      </button>
+    </template>
   </modal-window>
 </template>
 
@@ -51,7 +51,7 @@
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
   import { updateNote, currentNoteId, deleteGlobalNote } from "@/store"
-  import { useFocusTrap } from "@vueuse/integrations/useFocusTrap"
+  import { useConfirmDialog } from "../composables/useConfirmDialog"
 
   export default defineComponent({
     name: "NoteActions",
@@ -64,13 +64,23 @@
       const modalBody = ref("Modal Body")
       const action = ref("")
       const focusTarget = ref()
-      const {
-        hasFocus,
-        activate: activateFocus,
-        deactivate: deactivateFocus
-      } = useFocusTrap(focusTarget)
 
-      const Confirm = (permission: boolean) => {
+      // new Modal
+      const {
+        showDialog,
+        confirm: Confirm,
+        cancel: closeModal,
+        onConfirm,
+        onCancel
+      } = useConfirmDialog(showModal, () => console.log("Modal!"))
+
+      const clearModalMessages = () => {
+        action.value = ""
+        modalTitle.value = ""
+        modalBody.value = ""
+      }
+
+      onConfirm((permission: boolean) => {
         if (permission) {
           switch (action.value) {
             case "delete":
@@ -88,13 +98,16 @@
               break
           }
         }
-        closeModal()
-      }
+        clearModalMessages()
+      })
+
+      onCancel(() => {
+        clearModalMessages()
+      })
 
       const callModalDialog = (value: string) => {
         action.value = value
-        showModal.value = true
-        activateFocus()
+
         switch (value) {
           case "delete":
             modalTitle.value = "Do you realy want to delete this Note?"
@@ -117,15 +130,8 @@
             console.error("Error! No action selected!")
             break
         }
+        showDialog()
       }
-      const closeModal = () => {
-        deactivateFocus()
-        showModal.value = false
-        action.value = ""
-        modalTitle.value = ""
-        modalBody.value = ""
-      }
-
       const saveNote = () => {
         updateNote()
       }
