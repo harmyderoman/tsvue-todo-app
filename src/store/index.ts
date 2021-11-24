@@ -1,4 +1,3 @@
-
 import { createGlobalState, useStorage } from '@vueuse/core'
 import Note from '@/models/NoteModel'
 import ToDo from "@/models/ToDoModel"
