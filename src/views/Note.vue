@@ -61,9 +61,7 @@
 		currentNote,
 	} from '@/store'
 	import { useRefHistory } from '@vueuse/core'
-
 	import { useDebouncedRefHistory } from '@/composables/useDebounceRefHistory'
-	import { useDarkTheme } from '@/composables/useDarkTheme'
 
 	export default defineComponent({
 		name: 'Note',
@@ -73,7 +71,6 @@
 			NoteTitle,
 		},
 		setup() {
-			const { isDark, changeTheme } = useDarkTheme()
 			const notes = useGlobalNotes()
 
 			const note = currentNote

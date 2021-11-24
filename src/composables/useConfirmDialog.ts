@@ -1,4 +1,4 @@
-import { Ref } from 'vue-demi'
+import { Ref } from 'vue'
 import { createEventHook } from './createEventHook'
 
 export function useConfirmDialog(show: Ref<boolean>, fn: Function) {

@@ -1,6 +1,5 @@
 <template>
 	<div id="app">
-		<h1>Width: {{ width }} | Height: {{ height }}</h1>
 		<div class="nav-wrapper position-relative">
 			<ul class="nav nav-pills nav-fill flex-column flex-md-row">
 				<li class="nav-item">
@@ -29,14 +28,8 @@
 </template>
 
 <script>
-	import { useWindowSize } from '@/composables/useWindowSize'
-
 	export default {
 		name: 'App',
-		setup() {
-			const { width, height } = useWindowSize()
-			return { width, height }
-		},
 	}
 </script>
 
