@@ -47,21 +47,19 @@
 </template>
 
 <script lang="ts">
-	import { defineComponent, onMounted, nextTick, onUnmounted } from 'vue'
-	import TodoItem from '@/components/ToDoItem.vue'
+	import { defineComponent, onMounted, nextTick, onUnmounted, ref } from 'vue'
+	import { useDebouncedRefHistory } from '@vueuse/core'
 
+	import TodoItem from '@/components/ToDoItem.vue'
 	import NoteActions from '@/components/NoteActions.vue'
-	import ToDo from '@/models/ToDoModel'
-	import router from '@/router'
 	import NoteTitle from '@/components/NoteTitle.vue'
-	import {
-		useGlobalNotes,
-		currentNoteId,
-		getIdOfLastNote,
-		currentNote,
-	} from '@/store'
-	import { useRefHistory } from '@vueuse/core'
-	import { useDebouncedRefHistory } from '@/composables/useDebounceRefHistory'
+
+	import ToDo from '@/models/ToDoModel'
+
+	import router from '@/router'
+	import { useNotes } from '@/store/notes'
+
+	import { storeToRefs } from 'pinia'
 
 	export default defineComponent({
 		name: 'Note',
@@ -71,59 +69,50 @@
 			NoteTitle,
 		},
 		setup() {
-			const notes = useGlobalNotes()
+			const store = useNotes()
+			const { addNote, updateNote, deleteNote, getNoteById } = store
+			const { notes, currentNote, currentNoteId, getIdOfLastNote } =
+				storeToRefs(store)
 
-			const note = currentNote
-			const {
-				history,
-				undo,
-				redo,
-				canUndo,
-				canRedo,
-				clear,
-			} = useDebouncedRefHistory(note, { deep: true, clone: true }, 1000)
+			const { history, undo, redo, canUndo, canRedo, clear } =
+				useDebouncedRefHistory(currentNote, {
+					deep: true,
+					clone: true,
+					debounce: 300,
+				})
 
 			const { currentRoute } = router
 			const fetchNote = async () => {
 				if (currentRoute.value.params.id) {
 					const routeId: number = +currentRoute.value.params.id
 					currentNoteId.value = routeId
-					const fetchedNote = notes.value.find((note) => note.id === routeId)
-					if (fetchedNote) {
-						note.value.title = fetchedNote.title
-						note.value.todos = fetchedNote.todos
-					}
-				} else {
-					note.value.title = ''
-					note.value.todos = [] as ToDo[]
-					currentNoteId.value = getIdOfLastNote.value + 1
+					const fetchedNote = getNoteById(routeId)
+					if (fetchedNote) currentNote.value = fetchedNote
 				}
-				await nextTick()
-				clear()
 			}
 			onMounted(fetchNote)
 			onUnmounted(clear)
 
 			const updateTitle = (title: string) => {
-				note.value.title = title
+				currentNote.value.title = title
 			}
 
 			const addNewTodo = () => {
-				note.value.todos.push({} as ToDo)
+				currentNote.value.todos.push({} as ToDo)
 			}
 
 			const onRemoveTodo = (index: number) => {
-				note.value.todos.splice(index, 1)
+				currentNote.value.todos.splice(index, 1)
 			}
 
 			const clearNote = () => {
-				note.value.todos = []
-				note.value.title = ''
+				currentNote.value.todos = []
+				currentNote.value.title = ''
 				currentNoteId.value = getIdOfLastNote.value + 1
 			}
 
 			return {
-				note,
+				note: currentNote,
 				addNewTodo,
 				onRemoveTodo,
 				clearNote,

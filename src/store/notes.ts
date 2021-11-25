@@ -46,6 +46,9 @@ export const useNotes = defineStore('notes', {
       } else {
         return 0
       }
+    },
+    getNoteById: (state) => {
+      return (id: number) => state.notes.find(note => note.id === id)
     }
   }
 
