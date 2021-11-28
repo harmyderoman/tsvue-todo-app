@@ -21,8 +21,7 @@ export const useNotes = defineStore('notes', {
       this.currentNote.todos = this.currentNote.todos.filter(todo => todo.text)
     },
     updateNote() {
-
-      let note = this.notes.find(note => note.id === this.currentNoteId)
+      const note = this.notes.find(note => note.id === this.currentNoteId)
 
       if (note) {
         this.filterEmptyTodos()
@@ -39,7 +38,7 @@ export const useNotes = defineStore('notes', {
     },
   },
   getters: {
-    getIdOfLastNote: (state) => {
+    getIdOfLastNote: (state): number => {
       if (state.notes.length) {
         const index = state.notes.length - 1
         return state.notes[index].id
@@ -48,7 +47,8 @@ export const useNotes = defineStore('notes', {
       }
     },
     getNoteById: (state) => {
-      return (id: number) => state.notes.find(note => note.id === id)
+      return (id: number): Note | undefined =>
+        JSON.parse(JSON.stringify(state.notes.find(note => note.id === id)))
     }
   }
 

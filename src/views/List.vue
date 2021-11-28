@@ -38,9 +38,7 @@
 		<template v-slot:modal-header>
 			Are you sure that you want to delete this note?
 		</template>
-		<template v-slot:modal-body>
-			This note will be delete forever!
-		</template>
+		<template v-slot:modal-body> This note will be delete forever! </template>
 		<template v-slot:modal-actions
 			><button
 				type="button"
