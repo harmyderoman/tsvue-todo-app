@@ -70,7 +70,7 @@
 		},
 		setup() {
 			const store = useNotes()
-			const { addNote, updateNote, deleteNote, getNoteById } = store
+			const { addNote, deleteNote, getNoteById } = store
 			const { notes, currentNote, currentNoteId, getIdOfLastNote } =
 				storeToRefs(store)
 
@@ -87,7 +87,12 @@
 					const routeId: number = +currentRoute.value.params.id
 					currentNoteId.value = routeId
 					const fetchedNote = getNoteById(routeId)
-					if (fetchedNote) currentNote.value = fetchedNote
+					if (fetchedNote) {
+						currentNote.value = fetchedNote
+						clear()
+					}
+				} else {
+					currentNoteId.value = getIdOfLastNote.value + 1
 				}
 			}
 			onMounted(fetchNote)
