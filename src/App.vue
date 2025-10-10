@@ -1,5 +1,5 @@
 <template>
-	<div id="app">
+	<div>
 		<div class="nav-wrapper position-relative">
 			<ul class="nav nav-pills nav-fill flex-column flex-md-row">
 				<li class="nav-item">
@@ -27,10 +27,7 @@
 	</div>
 </template>
 
-<script>
-	export default {
-		name: 'App',
-	}
+<script setup lang="ts">
 </script>
 
 <style>
