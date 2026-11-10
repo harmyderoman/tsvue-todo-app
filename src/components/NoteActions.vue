@@ -2,7 +2,13 @@
   <span class="saved-flag" :class="{ 'is-visible': justSaved }" role="status">
     {{ justSaved ? "Saved" : "" }}
   </span>
-  <button class="btn btn--accent" type="button" @click="saveNote">
+  <button
+    class="btn btn--accent"
+    type="button"
+    :disabled="store.isEmptyNote"
+    :title="store.isEmptyNote ? 'Add a title or a todo first' : undefined"
+    @click="saveNote"
+  >
     Save
   </button>
   <share-note />

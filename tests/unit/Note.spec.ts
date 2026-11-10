@@ -233,6 +233,7 @@ describe("Note editor", () => {
     it("saves in place and confirms with a status message", async () => {
       await openApp("/note")
       store.updateTitle("Groceries")
+      await flushPromises() // Save is disabled until the title has rendered
 
       await buttonByText("Save").trigger("click")
 
@@ -241,12 +242,29 @@ describe("Note editor", () => {
       expect(store.notes.map((note) => note.title)).toEqual(["Groceries"])
     })
 
+    it("keeps Save and Share disabled while the note is empty", async () => {
+      await openApp("/note")
+      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+      expect(buttonByText("Share").attributes("disabled")).toBeDefined()
+
+      store.updateTitle("Groceries")
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
+      expect(buttonByText("Share").attributes("disabled")).toBeUndefined()
+
+      store.updateTitle("")
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+      expect(buttonByText("Share").attributes("disabled")).toBeDefined()
+    })
+
     it("offers Delete only for a note that has been saved", async () => {
       const deleteNote = () => wrapper.find(".editor__actions .btn--danger")
       await openApp("/note")
       expect(deleteNote().exists()).toBe(false)
 
       store.updateTitle("Groceries")
+      await flushPromises()
       await buttonByText("Save").trigger("click")
 
       expect(deleteNote().exists()).toBe(true)

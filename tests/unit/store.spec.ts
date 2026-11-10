@@ -253,6 +253,28 @@ describe("notes store", () => {
     })
   })
 
+  describe("isEmptyNote", () => {
+    it("is true for a new note, and for one holding only blanks", () => {
+      store.startNewNote()
+      expect(store.isEmptyNote).toBe(true)
+
+      store.updateTitle("   ")
+      store.addTodo()
+      expect(store.isEmptyNote).toBe(true)
+    })
+
+    it("is false once the note has a title or a todo with text", () => {
+      store.startNewNote()
+      store.updateTitle("Groceries")
+      expect(store.isEmptyNote).toBe(false)
+
+      store.updateTitle("")
+      store.addTodo()
+      store.updateTodo(0, { text: "Milk" })
+      expect(store.isEmptyNote).toBe(false)
+    })
+  })
+
   describe("hasUnsavedChanges", () => {
     it("is false for an untouched new note", () => {
       store.startNewNote()

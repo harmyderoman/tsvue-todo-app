@@ -352,7 +352,15 @@ input {
    -------------------------------------------------------------------------- */
 
 .btn {
-  --btn-tint: rgba(255, 255, 255, 0.12);
+  /* The button's colour, as three r,g,b tones of one hue: lit, body and
+     shade. Both themes draw from these, so a variant is the same colour in
+     the dark theme (tinted glass) and the light one (a glossy bead). */
+  --bubble-top: 102, 224, 202;
+  --bubble-bottom: 18, 164, 146;
+  --bubble-shadow: 8, 124, 112;
+  /* dark theme only: how much colour the glass holds, and how strong the
+     sheet of light across its top is */
+  --btn-body: 0.3;
   --btn-gloss: 0.42;
   position: relative;
   display: inline-flex;
@@ -362,18 +370,26 @@ input {
   padding: 10px 20px;
   border: 0;
   border-radius: 999px;
-  /* layers, top to bottom: gloss on the upper half, light caught along the
-     bottom, the tint that gives the button its colour */
+  /* layers, top to bottom: gloss on the upper half, light leaving through
+     the bottom edge in the glass's own colour, the tinted see-through body */
   background:
     radial-gradient(120% 95% at 50% -25%, rgba(255, 255, 255, var(--btn-gloss)), transparent 64%),
-    radial-gradient(90% 70% at 50% 125%, rgba(255, 255, 255, 0.2), transparent 70%),
-    linear-gradient(var(--btn-tint), var(--btn-tint));
+    radial-gradient(85% 80% at 50% 130%, rgba(var(--bubble-top), 0.5), transparent 72%),
+    linear-gradient(
+      160deg,
+      rgba(var(--bubble-top), var(--btn-body)),
+      rgba(var(--bubble-bottom), calc(var(--btn-body) * 1.4))
+    );
+  /* a bright lip on top, a rim in the glass's colour, shade pooled inside the
+     lower edge, and below it the coloured light the glass throws */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -7px 10px -7px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 0 0 1px rgba(var(--bubble-top), 0.38),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -7px 10px -7px rgba(var(--bubble-shadow), 0.85),
     0 1px 2px rgba(0, 0, 0, 0.35),
-    0 10px 22px -10px rgba(0, 0, 0, 0.7);
+    0 10px 18px -10px rgba(var(--bubble-bottom), 0.6),
+    0 10px 22px -10px rgba(0, 0, 0, 0.65);
   font-weight: 500;
   line-height: 1.2;
   color: var(--foam);
@@ -389,13 +405,15 @@ input {
 
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  filter: brightness(1.18);
+  filter: brightness(1.15);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
-    inset 0 -7px 10px -7px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(var(--bubble-top), 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -7px 10px -7px rgba(var(--bubble-shadow), 0.85),
     0 1px 2px rgba(0, 0, 0, 0.35),
-    0 16px 28px -12px rgba(0, 0, 0, 0.8);
+    0 16px 24px -12px rgba(var(--bubble-bottom), 0.75),
+    0 16px 28px -12px rgba(0, 0, 0, 0.75);
 }
 
 /* Pressed in: the gloss goes and the shadow moves inside. */
@@ -413,24 +431,39 @@ input {
   font-size: 0.875rem;
 }
 
+/* Variants. Order matters: a later colour wins when classes are combined,
+   so a quiet danger button is still red. */
+
+/* Secondary actions: pale slate, thinner and clearer, so they sit behind the
+   primary action without going flat. */
+.btn--quiet {
+  --bubble-top: 228, 237, 242;
+  --bubble-bottom: 158, 181, 194;
+  --bubble-shadow: 71, 99, 116;
+  --btn-body: 0.2;
+  --btn-gloss: 0.26;
+}
+
+.btn--share {
+  --bubble-top: 157, 205, 255;
+  --bubble-bottom: 75, 132, 225;
+  --bubble-shadow: 45, 84, 160;
+  --btn-body: 0.38;
+  color: #dce9ff;
+}
+
 .btn--accent {
-  --btn-tint: rgba(53, 224, 200, 0.45);
+  --bubble-top: 67, 225, 192;
+  --bubble-bottom: 5, 158, 132;
+  --btn-body: 0.42;
 }
 
 .btn--danger {
-  --btn-tint: rgba(255, 111, 138, 0.3);
-  color: #ffc2cd;
-}
-
-/* Secondary actions: the same bead, thinner and clearer, so they sit behind
-   the primary action without going flat. */
-.btn--quiet {
-  --btn-tint: rgba(255, 255, 255, 0.04);
-  --btn-gloss: 0.22;
-}
-
-.btn--quiet.btn--danger {
-  --btn-tint: rgba(255, 111, 138, 0.14);
+  --bubble-top: 255, 159, 177;
+  --bubble-bottom: 225, 63, 102;
+  --bubble-shadow: 164, 33, 66;
+  --btn-body: 0.4;
+  color: #ffd6dd;
 }
 
 /* Disabled: glass with the light switched off. No gloss, no lift, a matte
@@ -941,6 +974,17 @@ input.note-title,
 .about__card strong {
   font-weight: 600;
   color: var(--foam);
+}
+
+.about__card a:not(.btn) {
+  color: var(--lagoon);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.about__card a:not(.btn):hover {
+  text-decoration-thickness: 2px;
 }
 
 .about__points {
@@ -1559,13 +1603,18 @@ input.note-title,
 [data-theme='light'] .note-row:hover {
   box-shadow: var(--glass-inset), 0 4px 7px rgba(35,76,92,.15), 0 30px 45px -18px rgba(35,76,92,.32);
 }
+/* Buttons bring their own colour (see .btn); the other beads are lagoon. */
 [data-theme='light'] .liquid-toggle__drop,
-[data-theme='light'] .btn,
 [data-theme='light'] .modal__close,
 [data-theme='light'] .check {
   --bubble-top: 102,224,202;
   --bubble-bottom: 18,164,146;
   --bubble-shadow: 8,124,112;
+}
+[data-theme='light'] .liquid-toggle__drop,
+[data-theme='light'] .btn,
+[data-theme='light'] .modal__close,
+[data-theme='light'] .check {
   --bubble-fill:
     radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.95), transparent 62%),
     linear-gradient(160deg, rgba(var(--bubble-top),.7), rgba(var(--bubble-bottom),.55));
@@ -1578,26 +1627,14 @@ input.note-title,
     0 6px 12px -4px rgba(var(--bubble-shadow),.35);
 }
 
-[data-theme='light'] .btn--quiet {
-  --bubble-top: 228,237,242;
-  --bubble-bottom: 158,181,194;
-  --bubble-shadow: 71,99,116;
-}
 [data-theme='light'] .btn--share {
-  --bubble-top: 157,205,255;
-  --bubble-bottom: 75,132,225;
-  --bubble-shadow: 45,84,160;
   color: #183d79;
 }
-[data-theme='light'] .btn--accent,
 [data-theme='light'] .check {
   --bubble-top: 67,225,192;
   --bubble-bottom: 5,158,132;
 }
 [data-theme='light'] .btn--danger {
-  --bubble-top: 255,159,177;
-  --bubble-bottom: 225,63,102;
-  --bubble-shadow: 164,33,66;
   color: #a21e40;
 }
 [data-theme='light'] .btn:disabled {

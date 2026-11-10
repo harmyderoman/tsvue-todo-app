@@ -76,6 +76,11 @@ export const useNotesStore = defineStore('notes', () => {
   const isSavedNote = computed(() =>
     notes.value.some(note => note.id === currentId.value)
   )
+  /** Whether the editor holds nothing to keep or send: no title, no todo with text. */
+  const isEmptyNote = computed(() => {
+    const { title, todos } = currentNote.value
+    return title.trim() === '' && todos.every(todo => todo.text.trim() === '')
+  })
   /** Whether the editor holds changes that Save would write. */
   const hasUnsavedChanges = computed(() => {
     const saved = notes.value.find(note => note.id === currentId.value)
@@ -157,6 +162,7 @@ export const useNotesStore = defineStore('notes', () => {
     currentId,
     idOfLastNote,
     isSavedNote,
+    isEmptyNote,
     hasUnsavedChanges,
     canUndo,
     canRedo,
