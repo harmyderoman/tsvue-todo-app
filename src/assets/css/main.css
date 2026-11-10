@@ -1133,6 +1133,125 @@ input.note-title,
   }
 }
 
+/* Theme control stays reachable while scrolling on every route. */
+.theme-toggle {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.theme-toggle svg {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 420px) {
+  .shell { padding-top: 72px; }
+  .nav { top: 72px; }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --ink: #e6f1f3;
+  --ink-deep: #f2f7f8;
+  --foam: #142f3b;
+  --foam-dim: #385563;
+  --foam-faint: #536b77;
+  --lagoon: #087c70;
+  --periwinkle: #596bc7;
+  --glass-fill:
+    radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.98), transparent 58%),
+    linear-gradient(145deg, rgba(255,255,255,.76), rgba(221,237,241,.4) 52%, rgba(255,255,255,.72));
+  --glass-rim: linear-gradient(145deg, #fff, rgba(255,255,255,.85) 24%, rgba(66,108,123,.3) 65%, #fff);
+  --glass-inset:
+    inset 0 2px 1px rgba(255,255,255,.98),
+    inset 2px 0 3px rgba(255,255,255,.7),
+    inset 0 -2px 3px rgba(54,98,115,.14),
+    inset 0 16px 22px -18px #fff;
+  --glass-drop:
+    0 2px 4px rgba(35,76,92,.14),
+    0 14px 26px -12px rgba(35,76,92,.28),
+    0 32px 60px -24px rgba(35,76,92,.3);
+}
+
+[data-theme='light'] .tide {
+  background: radial-gradient(120% 90% at 50% 0%, #c4dfe6, #e8f0f3 65%, #f2f7f8);
+}
+
+[data-theme='light'] .tide__pool { opacity: .3; }
+[data-theme='light'] .well {
+  background: linear-gradient(180deg, rgba(109,153,168,.16), rgba(255,255,255,.3));
+  box-shadow:
+    inset 0 2px 5px rgba(27,69,85,.19),
+    inset 0 1px 2px rgba(27,69,85,.12),
+    inset 0 -1px 1px #fff,
+    0 1px 0 rgba(255,255,255,.85);
+}
+
+[data-theme='light'] .btn {
+  --btn-tint: rgba(222,237,242,.85);
+  --btn-gloss: .95;
+  box-shadow:
+    inset 0 2px 1px #fff,
+    inset 1px 0 2px rgba(255,255,255,.8),
+    inset 0 -2px 3px rgba(49,94,112,.2),
+    0 2px 3px rgba(27,69,85,.16),
+    0 7px 12px -4px rgba(27,69,85,.23);
+}
+[data-theme='light'] .btn:hover:not(:disabled) {
+  filter: brightness(1.03);
+  box-shadow: inset 0 2px 1px #fff, inset 0 -2px 3px rgba(49,94,112,.18),
+    0 3px 5px rgba(27,69,85,.15), 0 12px 18px -5px rgba(27,69,85,.28);
+}
+[data-theme='light'] .btn:active:not(:disabled) {
+  box-shadow: inset 0 2px 5px rgba(27,69,85,.25), inset 0 -1px 0 #fff;
+}
+[data-theme='light'] .note-card:hover,
+[data-theme='light'] .note-row:hover {
+  box-shadow: var(--glass-inset), 0 4px 7px rgba(35,76,92,.15), 0 30px 45px -18px rgba(35,76,92,.32);
+}
+[data-theme='light'] .btn--accent { --btn-tint: rgba(25,161,142,.24); }
+[data-theme='light'] .btn--quiet { --btn-tint: rgba(255,255,255,.25); }
+[data-theme='light'] .btn--danger {
+  --btn-tint: rgba(196,41,77,.13);
+  color: #a21e40;
+}
+[data-theme='light'] .btn:disabled {
+  color: #6b7b83;
+  background: repeating-linear-gradient(-45deg, rgba(27,69,85,.06) 0 5px, rgba(27,69,85,.02) 5px 10px);
+  box-shadow: inset 0 1px 3px rgba(27,69,85,.15);
+}
+[data-theme='light'] input.note-title,
+[data-theme='light'] .todo__input {
+  background: rgba(255,255,255,.6);
+  box-shadow: inset 0 2px 4px rgba(27,69,85,.17), 0 0 0 2px rgba(8,124,112,.55);
+}
+[data-theme='light'] .check {
+  border-color: #678590;
+  box-shadow: inset 0 2px 4px rgba(27,69,85,.24), inset 0 -1px 1px #fff, 0 1px 0 #fff;
+}
+[data-theme='light'] .check:checked {
+  border-color: var(--lagoon);
+  background-color: #a2dfcf;
+  box-shadow: inset 0 2px 2px rgba(255,255,255,.8), inset 0 -3px 4px rgba(0,60,60,.25), 0 2px 5px rgba(8,124,112,.22);
+}
+[data-theme='light'] .meter { background: rgba(27,69,85,.12); }
+[data-theme='light'] .note-card__todo::before { background: #8a9ea6; }
+[data-theme='light'] .note-card__todo.completed::before { background: var(--lagoon); }
+[data-theme='light'] .modal { background: rgba(53,81,92,.25); }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  [data-theme='light'] .glass { background: #f5fafb; }
+}
+
 /* Touch screens: grow controls to a comfortable 44px target */
 @media (pointer: coarse) {
   .btn,

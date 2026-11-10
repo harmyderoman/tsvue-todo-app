@@ -1,4 +1,19 @@
 <template>
+  <button
+    class="theme-toggle glass"
+    type="button"
+    :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+    :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+    @click="isDark = !isDark"
+  >
+    <svg v-if="isDark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+    </svg>
+    <svg v-else viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+      <path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z" />
+    </svg>
+  </button>
   <div class="tide" aria-hidden="true">
     <span class="tide__pool tide__pool--lagoon"></span>
     <span class="tide__pool tide__pool--coral"></span>
@@ -33,11 +48,17 @@
 <script lang="ts">
   import { defineComponent, nextTick, onMounted, ref, watch } from "vue"
   import { useRoute, useRouter } from "vue-router"
-  import { useEventListener } from "@vueuse/core"
+  import { useDark, useEventListener } from "@vueuse/core"
 
   export default defineComponent({
     name: "App",
     setup() {
+      const isDark = useDark({
+        attribute: "data-theme",
+        valueDark: "dark",
+        valueLight: "light",
+        storageKey: "todo-app:theme"
+      })
       const route = useRoute()
       const router = useRouter()
       const navList = ref<HTMLElement | null>(null)
@@ -65,7 +86,7 @@
       })
       useEventListener(window, "resize", placeDrop)
 
-      return { navList, dropVisible }
+      return { navList, dropVisible, isDark }
     }
   })
 </script>
