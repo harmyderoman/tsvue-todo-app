@@ -15,7 +15,9 @@ describe('shared notes', () => {
     expect(decodeNote(encoded)).toEqual(note)
     expect(encoded).not.toMatch(/[+/=]/)
     const url = new URL(sharedUrl(note))
-    expect(decodeNote(new URLSearchParams(url.hash.split('?')[1]).get('data')!)).toEqual(note)
+    expect(url.hash).toBe('')
+    expect(url.pathname).toBe(`${import.meta.env.BASE_URL}shared`)
+    expect(decodeNote(url.searchParams.get('data')!)).toEqual(note)
   })
 
   it('rejects malformed and incorrectly shaped payloads', () => {

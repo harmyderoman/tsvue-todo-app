@@ -24,7 +24,7 @@ export function decodeNote(payload: string): Draft | null {
 }
 
 export function sharedUrl(note: Draft): string {
-  const url = new URL(window.location.href)
-  url.hash = `/shared?data=${encodeNote(note)}`
+  const url = new URL(`${import.meta.env.BASE_URL}shared`, window.location.origin)
+  url.searchParams.set('data', encodeNote(note))
   return url.href
 }
