@@ -1,33 +1,30 @@
-import { nextTick } from "vue"
-import store from "@/store"
+import { createPinia, setActivePinia } from "pinia"
+import { useNotesStore } from "@/store"
+
+export type NotesStore = ReturnType<typeof useNotesStore>
 
 /**
- * The store is a singleton persisted to localStorage, so every test starts by
- * emptying it. This goes through mutations (not replaceState) because
- * currentNote is tied to the undo/redo history ref.
+ * Empties localStorage and activates a brand-new Pinia, so every test gets a
+ * store with no notes and no history. Returns the Pinia too, for tests that
+ * mount the whole app and need to install it.
  */
-export async function resetStore(): Promise<void> {
-  for (const note of [...store.state.notes]) {
-    store.commit("setCurrentId", note.id)
-    store.commit("deleteNote")
-  }
-  store.commit("setCurrentNote", { title: "", todos: [] })
-  store.commit("setCurrentId", 0)
-  // History records changes on the next tick; clear it only after that.
-  await nextTick()
-  store.commit("clearHistory")
+export function freshStore() {
   localStorage.clear()
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  return { pinia, store: useNotesStore() }
 }
 
 /** Saves a note through the same path the UI uses and returns its id. */
 export function seedNote(
+  store: NotesStore,
   title: string,
   todos: { text: string; completed: boolean }[]
 ): number {
-  const id = store.getters.getIdOfLastNote + 1
-  store.commit("setCurrentId", id)
-  store.commit("setCurrentNote", { title, todos })
-  store.dispatch("saveNote")
-  store.commit("setCurrentNote", { title: "", todos: [] })
+  store.startNewNote()
+  const id = store.currentId
+  store.currentNote = { title, todos }
+  store.saveNote()
+  store.closeNote()
   return id
 }

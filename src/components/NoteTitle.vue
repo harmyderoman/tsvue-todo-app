@@ -1,12 +1,16 @@
 <template>
-  <h3
-    v-if="!editable"
-    class="note-title"
-    :class="{ 'is-placeholder': !title }"
-    @click="editable = true"
-  >
-    {{ title ? title : "Click to edit Title" }}
-  </h3>
+  <h1 v-if="!editable" class="note-title-heading">
+    <button
+      ref="displayRef"
+      type="button"
+      class="note-title"
+      :class="{ 'is-placeholder': !title }"
+      @click="editable = true"
+    >
+      {{ title ? title : "Click to edit Title" }}
+    </button>
+  </h1>
+  <!-- keydown, not keyup: the Enter that opened the field must not close it -->
   <input
     v-else
     ref="titleRef"
@@ -15,7 +19,7 @@
     aria-label="Note title"
     :value="title"
     @input="onTextChange"
-    @keyup.enter="editable = false"
+    @keydown.enter="finishWithKeyboard"
   />
 </template>
 
@@ -34,6 +38,7 @@
     emits: ["update-title"],
     setup() {
       const titleRef = ref<HTMLInputElement | null>(null)
+      const displayRef = ref<HTMLButtonElement | null>(null)
       const editable = ref(false)
 
       onClickOutside(titleRef, () => {
@@ -48,7 +53,14 @@
         titleRef.value?.focus()
       })
 
-      return { titleRef, editable }
+      // Keep keyboard users where they were instead of dropping focus to <body>.
+      const finishWithKeyboard = async () => {
+        editable.value = false
+        await nextTick()
+        displayRef.value?.focus()
+      }
+
+      return { titleRef, displayRef, editable, finishWithKeyboard }
     },
     methods: {
       onTextChange(e: Event) {

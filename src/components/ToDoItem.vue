@@ -8,8 +8,10 @@
         aria-label="Mark as done"
       />
 
-      <span
+      <button
         v-if="!editable"
+        ref="displayRef"
+        type="button"
         class="todo__text"
         :class="{
           completed: todo.completed && todo.text,
@@ -18,7 +20,8 @@
         @click="editable = true"
       >
         {{ todo.text ? todo.text : "Click to edit Todo" }}
-      </span>
+      </button>
+      <!-- keydown, not keyup: the Enter that opened the field must not close it -->
       <input
         v-else
         ref="textInput"
@@ -27,7 +30,7 @@
         aria-label="Todo text"
         :value="todo.text"
         @input="onTextChange"
-        @keyup.enter="editable = false"
+        @keydown.enter="finishWithKeyboard"
       />
     </div>
 
@@ -68,6 +71,7 @@
     setup() {
       const todoItem = ref<HTMLElement | null>(null)
       const textInput = ref<HTMLInputElement | null>(null)
+      const displayRef = ref<HTMLButtonElement | null>(null)
       const editable = ref(false)
 
       onClickOutside(todoItem, () => {
@@ -82,7 +86,14 @@
         textInput.value?.focus()
       })
 
-      return { todoItem, textInput, editable }
+      // Keep keyboard users where they were instead of dropping focus to <body>.
+      const finishWithKeyboard = async () => {
+        editable.value = false
+        await nextTick()
+        displayRef.value?.focus()
+      }
+
+      return { todoItem, textInput, displayRef, editable, finishWithKeyboard }
     },
     methods: {
       onTextChange(e: Event) {

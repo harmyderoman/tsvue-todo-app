@@ -18,7 +18,7 @@
         v-for="(note, index) in notes"
         :key="note.id"
         class="note-card glass"
-        :style="{ '--i': index }"
+        :style="{ '--i': Math.min(index, MAX_STAGGER) }"
       >
         <h2 class="note-card__title" :class="{ 'is-untitled': !note.title }">
           {{ note.title || "Untitled note" }}
@@ -26,12 +26,15 @@
 
         <ul v-if="note.todos.length" class="note-card__todos">
           <li
-            v-for="(todo, todoIndex) in note.todos"
+            v-for="(todo, todoIndex) in note.todos.slice(0, PREVIEW_TODOS)"
             :key="todoIndex"
             class="note-card__todo"
             :class="{ completed: todo.completed }"
           >
             {{ todo.text }}
+          </li>
+          <li v-if="note.todos.length > PREVIEW_TODOS" class="note-card__more">
+            +{{ note.todos.length - PREVIEW_TODOS }} more
           </li>
         </ul>
 
@@ -94,37 +97,45 @@
 <script lang="ts">
   import ModalWindow from "@/components/ModalWindow.vue"
   import Note from "@/models/NoteModel"
-  import store from "@/store"
+  import { useNotesStore } from "@/store"
   import { pinLeaving } from "@/glass"
   import { defineComponent, computed, ref } from "vue"
+
+  // A card previews this many todos; the rest are summarised as "+N more".
+  const PREVIEW_TODOS = 6
+  // Cards past this index appear together instead of queueing ever longer.
+  const MAX_STAGGER = 8
 
   export default defineComponent({
     name: "List",
     components: { ModalWindow },
     setup() {
-      const notes = computed(() => store.state.notes)
+      const store = useNotesStore()
+      const notes = computed(() => store.notes)
 
-      const showModal = ref(false)
+      // The note waiting for the delete confirmation, if any.
+      const pendingDeleteId = ref<number | null>(null)
+      const showModal = computed(() => pendingDeleteId.value !== null)
 
       const doneCount = (note: Note): number =>
         note.todos.filter((todo) => todo.completed).length
 
       const onDeleteNote = (noteId: number) => {
-        showModal.value = true
-        store.commit("setCurrentId", noteId)
+        pendingDeleteId.value = noteId
       }
       const confirmDelete = (permission: boolean): void => {
-        if (permission) {
-          store.commit("deleteNote")
+        if (permission && pendingDeleteId.value !== null) {
+          store.deleteNote(pendingDeleteId.value)
         }
         closeModal()
       }
       function closeModal() {
-        store.commit("setCurrentId", 0)
-        showModal.value = false
+        pendingDeleteId.value = null
       }
 
       return {
+        PREVIEW_TODOS,
+        MAX_STAGGER,
         notes,
         doneCount,
         onDeleteNote,

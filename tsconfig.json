@@ -16,9 +16,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "vuex": [
-        "./node_modules/vuex/types/index.d.ts"
       ]
     },
     "lib": [

@@ -70,7 +70,7 @@ describe("ToDoItem", () => {
     const wrapper = mountTodo()
 
     await wrapper.find(".todo__text").trigger("click")
-    await wrapper.find(".todo__input").trigger("keyup.enter")
+    await wrapper.find(".todo__input").trigger("keydown.enter")
 
     expect(wrapper.find(".todo__input").exists()).toBe(false)
   })

@@ -1,6 +1,6 @@
 # tsvue-todo-app
 
-Notes with todo lists, built with Vue 3, TypeScript, Vuex and Vite.
+Notes with todo lists, built with Vue 3, TypeScript, Pinia and Vite.
 Live at https://harmyderoman.github.io/tsvue-todo-app/.
 
 ## Project setup
@@ -23,8 +23,10 @@ npm install
 
 ## Deployment
 
-`npm run deploy` runs the tests, builds the app and force-pushes `dist/` to the
-`gh-pages` branch of this repository. GitHub Pages must be set to serve that
+`npm run deploy` type-checks, runs the tests, builds the app and force-pushes
+`dist/` to the `gh-pages` branch of this repository. It refuses to run with
+uncommitted changes, so the published site always matches a commit (set
+`DEPLOY_ALLOW_DIRTY=1` to override). GitHub Pages must be set to serve that
 branch: Settings → Pages → Source "Deploy from a branch" → `gh-pages` / root.
 
 To publish somewhere else, set `DEPLOY_REPO` and `DEPLOY_BRANCH`:

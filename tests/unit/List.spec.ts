@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { mount, RouterLinkStub } from "@vue/test-utils"
 import List from "@/views/List.vue"
-import store from "@/store"
-import { resetStore, seedNote } from "./helpers"
+import { freshStore, NotesStore, seedNote } from "./helpers"
+
+let store: NotesStore
 
 const push = vi.fn()
 
@@ -18,8 +19,8 @@ const buttonByText = (wrapper: ReturnType<typeof mountList>, text: string) =>
   wrapper.findAll("button").find((button) => button.text() === text)!
 
 describe("List", () => {
-  beforeEach(async () => {
-    await resetStore()
+  beforeEach(() => {
+    store = freshStore().store
     push.mockClear()
   })
 
@@ -32,11 +33,11 @@ describe("List", () => {
   })
 
   it("renders a card per note with its todos and progress", () => {
-    seedNote("Groceries", [
+    seedNote(store, "Groceries", [
       { text: "Milk", completed: true },
       { text: "Bread", completed: false }
     ])
-    seedNote("Trip", [])
+    seedNote(store, "Trip", [])
     const wrapper = mountList()
 
     const cards = wrapper.findAll(".note-card")
@@ -57,14 +58,14 @@ describe("List", () => {
   })
 
   it("labels a note without a title", () => {
-    seedNote("", [{ text: "Milk", completed: false }])
+    seedNote(store, "", [{ text: "Milk", completed: false }])
     const wrapper = mountList()
 
     expect(wrapper.find(".note-card__title").text()).toBe("Untitled note")
   })
 
   it("opens a note", async () => {
-    const id = seedNote("Groceries", [])
+    const id = seedNote(store, "Groceries", [])
     const wrapper = mountList()
 
     await buttonByText(wrapper, "Open note").trigger("click")
@@ -73,29 +74,45 @@ describe("List", () => {
   })
 
   it("deletes a note only after confirmation", async () => {
-    seedNote("Groceries", [])
-    seedNote("Trip", [])
+    seedNote(store, "Groceries", [])
+    seedNote(store, "Trip", [])
     const wrapper = mountList()
 
     await buttonByText(wrapper, "Delete note").trigger("click")
     expect(wrapper.find(".modal").exists()).toBe(true)
-    expect(store.state.notes).toHaveLength(2)
+    expect(store.notes).toHaveLength(2)
 
     await buttonByText(wrapper, "Confirm").trigger("click")
 
     expect(wrapper.find(".modal").exists()).toBe(false)
-    expect(store.state.notes.map((note) => note.title)).toEqual(["Trip"])
+    expect(store.notes.map((note) => note.title)).toEqual(["Trip"])
     expect(wrapper.findAll(".note-card")).toHaveLength(1)
   })
 
   it("keeps the note when the dialog is cancelled", async () => {
-    seedNote("Groceries", [])
+    seedNote(store, "Groceries", [])
     const wrapper = mountList()
 
     await buttonByText(wrapper, "Delete note").trigger("click")
     await buttonByText(wrapper, "Cancel").trigger("click")
 
     expect(wrapper.find(".modal").exists()).toBe(false)
-    expect(store.state.notes).toHaveLength(1)
+    expect(store.notes).toHaveLength(1)
+  })
+
+  it("previews the first six todos and counts the rest", () => {
+    seedNote(
+      store,
+      "Long",
+      Array.from({ length: 9 }, (_, i) => ({
+        text: `Todo ${i + 1}`,
+        completed: false
+      }))
+    )
+    const wrapper = mountList()
+
+    expect(wrapper.findAll(".note-card__todo")).toHaveLength(6)
+    expect(wrapper.find(".note-card__more").text()).toBe("+3 more")
+    expect(wrapper.find(".note-card__progress").text()).toBe("0 of 9 done")
   })
 })

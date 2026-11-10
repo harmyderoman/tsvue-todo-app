@@ -13,8 +13,9 @@
   --periwinkle: #7d8cff;
   --rose: #ff6f8a;
   --foam: #eef8f6;
-  --foam-dim: rgba(238, 248, 246, 0.66);
-  --foam-faint: rgba(238, 248, 246, 0.4);
+  --foam-dim: rgba(238, 248, 246, 0.78);
+  /* Lowest text tone. Keep at or above 0.6: lower fails 4.5:1 contrast. */
+  --foam-faint: rgba(238, 248, 246, 0.62);
 
   /* glass */
   --glass-fill: linear-gradient(
@@ -460,6 +461,12 @@ input {
   box-shadow: 0 0 10px rgba(53, 224, 200, 0.7);
 }
 
+.note-card__more {
+  padding-left: 22px;
+  font-size: 0.875rem;
+  color: var(--foam-dim);
+}
+
 .note-card__progress {
   display: grid;
   gap: 8px;
@@ -531,9 +538,27 @@ input {
 }
 
 .editor__actions {
+  align-items: center;
   justify-content: flex-end;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Confirmation that appears next to the actions after Save */
+.saved-flag {
+  margin-right: auto;
+  font-weight: 500;
+  color: var(--lagoon);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.5s var(--spring);
+}
+
+.saved-flag.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
 .note-title {
@@ -550,12 +575,20 @@ input {
   overflow-wrap: anywhere;
 }
 
-h3.note-title {
+.note-title-heading {
+  font: inherit;
+  letter-spacing: normal;
+}
+
+button.note-title {
+  display: block;
+  background: none;
+  text-align: left;
   cursor: text;
   transition: background 0.3s ease;
 }
 
-h3.note-title:hover {
+button.note-title:hover {
   background: rgba(255, 255, 255, 0.07);
 }
 
@@ -599,6 +632,10 @@ input.note-title,
   flex: 1;
   min-width: 0;
   padding: 4px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  text-align: left;
   cursor: text;
   overflow-wrap: anywhere;
   text-decoration: line-through;
@@ -697,6 +734,11 @@ input.note-title,
   width: min(100%, 440px);
   padding: 26px;
   border-radius: var(--r-lg);
+}
+
+/* Receives focus when the dialog opens; it is not itself a control. */
+.modal__dialog:focus {
+  outline: none;
 }
 
 .modal__head {
@@ -865,6 +907,29 @@ input.note-title,
 
   .todo__actions {
     margin-left: auto;
+  }
+}
+
+/* Touch screens: grow controls to a comfortable 44px target */
+@media (pointer: coarse) {
+  .btn,
+  .nav__link {
+    min-height: 44px;
+  }
+
+  .nav__link {
+    display: flex;
+    align-items: center;
+  }
+
+  .check {
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal__close {
+    width: 44px;
+    height: 44px;
   }
 }
 

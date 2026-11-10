@@ -1,25 +1,31 @@
 <template>
-  <button class="btn btn--accent" type="button" @click="callModalDialog('save')">
+  <span class="saved-flag" :class="{ 'is-visible': justSaved }" role="status">
+    {{ justSaved ? "Saved" : "" }}
+  </span>
+  <button class="btn btn--accent" type="button" @click="saveNote">
     Save
   </button>
-  <button class="btn" type="button" @click="callModalDialog('cancel')">
-    Cancel
+  <button class="btn" type="button" @click="backToNotes">
+    Back to notes
   </button>
-  <button class="btn btn--danger" type="button" @click="callModalDialog('delete')">
+  <button
+    v-if="store.isSavedNote"
+    class="btn btn--danger"
+    type="button"
+    @click="showModal = true"
+  >
     Delete
   </button>
-  <modal-window :show="showModal" @onClose="closeModal">
-    <template v-slot:modal-header>
-      {{ modalTitle }}
-    </template>
+  <modal-window :show="showModal" @onClose="showModal = false">
+    <template v-slot:modal-header>Delete this note?</template>
     <template v-slot:modal-body>
-      {{ modalBody }}
+      The note and its todos will be deleted for good.
     </template>
     <template v-slot:modal-actions>
-      <button type="button" class="btn btn--accent" @click="Confirm(true)">
-        Confirm
+      <button type="button" class="btn btn--danger" @click="deleteNote">
+        Delete
       </button>
-      <button type="button" class="btn" @click="Confirm(false)">
+      <button type="button" class="btn" @click="showModal = false">
         Cancel
       </button>
     </template>
@@ -27,10 +33,12 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref } from "vue"
-  import store from "@/store"
+  import { defineComponent, onBeforeUnmount, ref } from "vue"
+  import { useNotesStore } from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
+
+  const SAVED_FLAG_MS = 2500
 
   export default defineComponent({
     name: "NoteActions",
@@ -38,84 +46,37 @@
       ModalWindow
     },
     setup() {
+      const store = useNotesStore()
       const showModal = ref(false)
-      const modalTitle = ref("")
-      const modalBody = ref("")
-      const action = ref("")
+      const justSaved = ref(false)
 
-      const Confirm = (permission: boolean) => {
-        if (permission) {
-          switch (action.value) {
-            case "delete":
-              deleteNote()
-              break
-
-            case "save":
-              router.push("/")
-              break
-            case "cancel":
-              cancelEdit()
-              break
-            default:
-              console.error("Error! No action selected!")
-              break
-          }
-        }
-        closeModal()
-      }
-
-      const callModalDialog = (value: string) => {
-        action.value = value
-        showModal.value = true
-        switch (value) {
-          case "delete":
-            modalTitle.value = "Delete this note?"
-            modalBody.value = "You will go back to the list of notes."
-            break
-
-          case "save":
-            modalTitle.value = "Note saved"
-            modalBody.value =
-              "Confirm to go back to the list of notes, or Cancel to keep editing."
-            saveNote()
-            break
-
-          case "cancel":
-            modalTitle.value = "Leave without saving?"
-            modalBody.value = "All unsaved changes will be lost."
-            break
-
-          default:
-            console.error("Error! No action selected!")
-            break
-        }
-      }
-      // Only hide the dialog here: its text must stay put while it animates out.
-      const closeModal = () => {
-        showModal.value = false
-        action.value = ""
-      }
+      let savedTimer: ReturnType<typeof setTimeout> | undefined
+      onBeforeUnmount(() => clearTimeout(savedTimer))
 
       const saveNote = () => {
-        store.dispatch("saveNote")
+        store.saveNote()
+        justSaved.value = true
+        clearTimeout(savedTimer)
+        savedTimer = setTimeout(() => (justSaved.value = false), SAVED_FLAG_MS)
       }
-      const deleteNote = () => {
-        store.commit("deleteNote")
+      // Leaving is guarded in Note.vue, which asks first if there are unsaved changes.
+      const backToNotes = () => {
         router.push("/")
       }
-      const cancelEdit = () => {
+      const deleteNote = () => {
+        showModal.value = false
+        store.deleteNote(store.currentId)
+        // Empty the draft too, so leaving doesn't ask about unsaved changes.
+        store.closeNote()
         router.push("/")
       }
       return {
+        store,
         saveNote,
+        backToNotes,
         deleteNote,
-        cancelEdit,
         showModal,
-        modalTitle,
-        modalBody,
-        Confirm,
-        callModalDialog,
-        closeModal
+        justSaved
       }
     }
   })

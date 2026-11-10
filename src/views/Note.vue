@@ -15,7 +15,7 @@
       <TodoItem
         v-for="(todo, index) in note.todos"
         :todo="todo"
-        :key="todoKeys[index]"
+        :key="todo.id ?? index"
         @remove-todo="onRemoveTodo(index)"
         @update-todo="onUpdateTodo($event, index)"
         @checkbox-click="onCheckboxClick($event, index)"
@@ -31,17 +31,31 @@
     <div class="editor__actions">
       <note-actions />
     </div>
+
+    <modal-window :show="pendingPath !== null" @onClose="keepEditing">
+      <template v-slot:modal-header>Leave without saving?</template>
+      <template v-slot:modal-body>
+        Your changes to this note will be lost.
+      </template>
+      <template v-slot:modal-actions>
+        <button type="button" class="btn btn--danger" @click="leave">
+          Leave
+        </button>
+        <button type="button" class="btn" @click="keepEditing">
+          Keep editing
+        </button>
+      </template>
+    </modal-window>
   </main>
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, onMounted, ref, nextTick, watch } from "vue"
+  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
 
   import NoteActions from "@/components/NoteActions.vue"
-  import Note from "@/models/NoteModel"
-  import ToDo from "@/models/ToDoModel"
-  import store from "@/store"
+  import ModalWindow from "@/components/ModalWindow.vue"
+  import { useNotesStore } from "@/store"
   import router from "@/router"
   import { onBeforeRouteLeave } from "vue-router"
   import { pinLeaving } from "@/glass"
@@ -53,81 +67,80 @@
     components: {
       TodoItem,
       NoteActions,
+      ModalWindow,
       UndoRedoButtons,
       NoteTitle
     },
     setup() {
-      const note = computed(() => store.state.currentNote)
+      const store = useNotesStore()
+      const note = computed(() => store.currentNote)
 
-      // Todos carry no id, so keep a parallel list of stable keys. Without it
-      // removing a row would animate the last row out instead of the removed one.
-      let nextKey = 0
-      const todoKeys = ref<number[]>(note.value.todos.map(() => nextKey++))
-      watch(
-        () => note.value.todos.length,
-        (length) => {
-          // Reconcile after changes made elsewhere (undo/redo, loading a note).
-          while (todoKeys.value.length < length) todoKeys.value.push(nextKey++)
-          todoKeys.value.length = length
-        },
-        { flush: "sync" }
-      )
+      // Where the user was heading when the unsaved-changes dialog stopped them.
+      const pendingPath = ref<string | null>(null)
+      let leaveConfirmed = false
 
       const { currentRoute } = router
       const fetchNote = async () => {
         if (currentRoute.value.params.id) {
           const routeId: number = +currentRoute.value.params.id
-          store.dispatch("fetchCurrentNote", routeId)
+          if (!store.openNote(routeId)) {
+            // Stale or mistyped link: there is nothing to edit.
+            leaveConfirmed = true
+            router.replace("/")
+            return
+          }
         } else {
-          const id = store.getters.getIdOfLastNote + 1
-          store.commit("setCurrentNote", { ...store.state.currentNote })
-          store.commit("setCurrentId", id)
+          store.startNewNote()
         }
+        // History records the change above on the next tick; drop it so the
+        // freshly opened note has nothing to undo.
         await nextTick()
-        store.commit("clearHistory")
+        store.clearHistory()
       }
       onMounted(fetchNote)
 
       const updateTitle = (title: string) => {
-        store.commit("updateTitle", title)
+        store.updateTitle(title)
       }
 
       const addNewTodo = () => {
-        store.commit("addNewTodo")
+        store.addTodo()
       }
 
       const onRemoveTodo = (index: number) => {
-        todoKeys.value.splice(index, 1)
-        store.commit("deleteTodo", index)
+        store.removeTodo(index)
       }
       const onUpdateTodo = (text: string, index: number) => {
-        let todos = [...store.state.currentNote.todos]
-
-        todos[index] = { ...todos[index], text }
-        store.commit("updateTodos", todos)
+        store.updateTodo(index, { text })
       }
       const onCheckboxClick = (completed: boolean, index: number) => {
-        let todos = [...store.state.currentNote.todos]
-
-        todos[index] = { ...todos[index], completed }
-        store.commit("updateTodos", todos)
+        store.updateTodo(index, { completed })
       }
 
-      const clearNote = () => {
-        store.commit("setCurrentNote", {
-          title: "",
-          todos: [] as ToDo[]
-        } as Note)
-      }
-
-      onBeforeRouteLeave(() => {
-        clearNote()
-        store.commit("setCurrentId", store.getters.getIdOfLastNote + 1)
+      // Every way out of the editor (buttons, nav, browser Back) passes here.
+      onBeforeRouteLeave((to) => {
+        if (store.hasUnsavedChanges && !leaveConfirmed) {
+          pendingPath.value = to.fullPath
+          return false
+        }
+        store.closeNote()
       })
+
+      const leave = () => {
+        const path = pendingPath.value
+        pendingPath.value = null
+        leaveConfirmed = true
+        if (path) router.push(path)
+      }
+      const keepEditing = () => {
+        pendingPath.value = null
+      }
 
       return {
         note,
-        todoKeys,
+        pendingPath,
+        leave,
+        keepEditing,
         addNewTodo,
         onRemoveTodo,
         onUpdateTodo,
