@@ -175,7 +175,8 @@ input {
 
 .note-card,
 .note-row,
-.editor {
+.editor,
+.about__card {
   --glass-fill: var(--card-fill);
   --glass-blur: blur(4px) saturate(135%);
   --glass-sheen: .3;
@@ -902,6 +903,85 @@ input.note-title,
 }
 
 /* --------------------------------------------------------------------------
+   About page
+   -------------------------------------------------------------------------- */
+
+.about {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.about__card {
+  display: grid;
+  gap: 30px;
+  padding: 28px;
+  border-radius: var(--r-lg);
+}
+
+.about__card section {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.about__card h2 {
+  font-size: 1.4rem;
+}
+
+.about__card p,
+.about__card li {
+  max-width: 62ch;
+  color: var(--foam-dim);
+}
+
+.about__lede {
+  font-size: 1.125rem;
+}
+
+.about__card strong {
+  font-weight: 600;
+  color: var(--foam);
+}
+
+.about__points {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.about__points li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.about__points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--lagoon);
+}
+
+.about__aside {
+  font-size: 0.875rem;
+}
+
+.about__card .btn {
+  margin-top: 4px;
+}
+
+/* The way in: a quiet pill in the bottom corner of every other page. */
+.about-link {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 20;
+}
+
+/* --------------------------------------------------------------------------
    Modal
    -------------------------------------------------------------------------- */
 
@@ -1122,30 +1202,291 @@ input.note-title,
   }
 }
 
-/* Theme control stays reachable while scrolling on every route. */
-.theme-toggle {
+/* Theme switch: a pill that names the theme, under a lens of thick glass that
+   slides to the active side. Stays reachable while scrolling on every route.
+   Sizes (--pill-*, --lens-*) come from ThemeSwitch.vue. */
+.theme-switch {
+  --lens-x: 0px;
+  --lens-travel: calc(var(--pill-w) - var(--lens-w) + 2 * var(--lens-out));
+  --lens-ease: cubic-bezier(.3, 1.35, .5, 1);
+  /* How long the lens takes to cross the pill. The labels and icons keep
+     pace with it, so this one value speeds up or slows down the whole switch. */
+  --switch-speed: 2s;
+  --pill-fill: linear-gradient(180deg, rgba(16, 42, 50, .88), rgba(3, 13, 19, .92));
+  --pill-inset:
+    inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 0 -1px 0 rgba(0, 0, 0, .5),
+    inset 0 -9px 12px -8px rgba(0, 0, 0, .55);
+  --pill-drop:
+    0 1px 2px rgba(0, 0, 0, .4),
+    0 12px 24px -10px rgba(0, 0, 0, .75);
+  --pill-ink: var(--foam-dim);
   position: fixed;
-  top: max(16px, env(safe-area-inset-top));
-  right: max(16px, env(safe-area-inset-right));
+  /* centred on the nav bar; the lens rises above the pill */
+  top: max(26px, env(safe-area-inset-top) + 16px);
+  right: max(28px, env(safe-area-inset-right) + 16px);
+  z-index: 120;
+  width: var(--pill-w);
+  height: var(--pill-h);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-switch.is-dark {
+  --lens-x: var(--lens-travel);
+}
+
+.theme-switch__pill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pill-fill);
+  box-shadow: var(--pill-inset), var(--pill-drop);
+  -webkit-backdrop-filter: blur(14px) saturate(170%);
+  backdrop-filter: blur(14px) saturate(170%);
+}
+
+.theme-switch__label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  font-size: .875rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--pill-ink);
+  transition: opacity calc(var(--switch-speed) * .4) ease;
+}
+
+/* Each label fills the stretch of pill the lens leaves free on its side. */
+.theme-switch__label--light {
+  left: calc(var(--lens-w) - var(--lens-out));
+  right: 6px;
+}
+
+.theme-switch__label--dark {
+  left: 6px;
+  right: calc(var(--lens-w) - var(--lens-out));
+}
+
+.theme-switch.is-dark .theme-switch__label--light,
+.theme-switch:not(.is-dark) .theme-switch__label--dark {
+  opacity: 0;
+}
+
+.theme-switch__lens {
+  position: absolute;
+  top: calc((var(--pill-h) - var(--lens-h)) / 2);
+  left: calc(-1 * var(--lens-out));
+  width: var(--lens-w);
+  height: var(--lens-h);
+  border-radius: var(--lens-r);
+  overflow: hidden;
+  translate: var(--lens-x) 0;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, .25),
+    0 12px 20px -10px rgba(0, 0, 0, .6);
+  transition:
+    translate var(--switch-speed) var(--lens-ease),
+    scale .4s var(--spring);
+}
+
+/* Pressed, the lens swells and magnifies what is under it. */
+.theme-switch:active .theme-switch__lens {
+  scale: 1.07;
+  transition-duration: var(--switch-speed), .15s;
+}
+
+.theme-switch__refract {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The copy slides against the lens, so it never leaves the real pill. */
+.theme-switch__pill--echo {
+  inset: auto;
+  top: calc((var(--lens-h) - var(--pill-h)) / 2);
+  left: var(--lens-out);
+  width: var(--pill-w);
+  height: var(--pill-h);
+  border-radius: 999px;
+  box-shadow: var(--pill-inset);
+  translate: calc(-1 * var(--lens-x)) 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: translate var(--switch-speed) var(--lens-ease);
+}
+
+/* The body of the glass: a faint tint, light pooling low in it. */
+.theme-switch__lens::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background:
+    radial-gradient(90% 46% at 46% 106%, rgba(255, 255, 255, .16), transparent 72%),
+    linear-gradient(165deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .015) 46%, rgba(255, 255, 255, .06));
+}
+
+/* The rim: bright where light enters at the top left, a thin line elsewhere. */
+.theme-switch__lens::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .2),
+    inset 1px 1.5px 1px -.5px rgba(255, 255, 255, .7),
+    inset -1px -1.5px 1px -.5px rgba(255, 255, 255, .28),
+    inset 0 0 9px rgba(255, 255, 255, .1);
+}
+
+.theme-switch__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  color: #fff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .75));
+  transition:
+    opacity calc(var(--switch-speed) * .45) ease,
+    scale calc(var(--switch-speed) * .75) var(--spring),
+    rotate calc(var(--switch-speed) * .75) var(--glide);
+}
+
+.theme-switch.is-dark .theme-switch__icon--sun {
+  opacity: 0;
+  scale: .5;
+  rotate: 90deg;
+}
+
+.theme-switch:not(.is-dark) .theme-switch__icon--moon {
+  opacity: 0;
+  scale: .5;
+  rotate: -90deg;
+}
+
+.theme-switch__defs {
+  position: absolute;
+}
+
+[data-theme='light'] .theme-switch {
+  --pill-fill: linear-gradient(180deg, rgba(20, 138, 124, .94), rgba(8, 124, 112, .96));
+  --pill-inset:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -1px 0 rgba(3, 60, 54, .45),
+    inset 0 -9px 12px -8px rgba(3, 60, 54, .5);
+  --pill-drop:
+    0 1px 2px rgba(8, 90, 82, .3),
+    0 12px 22px -10px rgba(8, 90, 82, .6);
+  --pill-ink: #fff;
+}
+
+[data-theme='light'] .theme-switch__lens {
+  box-shadow:
+    0 1px 2px rgba(8, 80, 72, .2),
+    0 14px 20px -10px rgba(8, 80, 72, .55);
+}
+
+[data-theme='light'] .theme-switch__lens::before {
+  background:
+    radial-gradient(90% 46% at 46% 106%, rgba(255, 255, 255, .7), transparent 72%),
+    linear-gradient(165deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, .05) 46%, rgba(255, 255, 255, .2));
+}
+
+[data-theme='light'] .theme-switch__lens::after {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .42),
+    inset 1px 1.5px 1px -.5px #fff,
+    inset -1px -1.5px 1px -.5px rgba(255, 255, 255, .7),
+    inset 0 0 9px rgba(255, 255, 255, .3);
+}
+
+/* Logo: the favicon tick as a piece of glass, opposite the theme switch.
+   Pressing it sets it rippling like water (see AppLogo.vue). */
+.logo {
+  --logo-tint: linear-gradient(150deg, rgba(176, 204, 255, .3), rgba(72, 120, 240, .26));
+  --logo-lens: blur(1.5px) saturate(190%) brightness(1.22);
+  --logo-shadow: rgba(2, 14, 30, .55);
+  --logo-depth: rgba(20, 50, 150, .3);
+  position: fixed;
+  top: max(22px, env(safe-area-inset-top) + 12px);
+  left: max(16px, env(safe-area-inset-left) + 16px);
   z-index: 120;
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  transform-origin: right center;
+  border-radius: 12px;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.theme-toggle svg {
-  width: 24px;
-  height: 24px;
+.logo__mark {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  transform-origin: 42% 80%;
+  transition: scale .35s var(--spring);
 }
 
-@media (max-width: 420px) {
-  .shell { padding-top: 72px; }
-  .nav { top: 72px; }
+.logo:hover .logo__mark {
+  scale: 1.08;
+}
+
+.logo__glass,
+.logo__light {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The pane overhangs the mark (MARGIN in AppLogo.vue) so waves are not cut off. */
+.logo__glass {
+  inset: -25%;
+  width: 150%;
+  height: 150%;
+  background: var(--logo-tint);
+  -webkit-backdrop-filter: var(--logo-lens);
+  backdrop-filter: var(--logo-lens);
+}
+
+.logo__light {
+  overflow: visible;
+}
+
+.logo__shadow {
+  fill: var(--logo-shadow);
+}
+
+/* Thickness: the far side of the glass sits in its own shade. */
+.logo__depth {
+  stroke: var(--logo-depth);
+}
+
+[data-theme='light'] .logo {
+  --logo-tint: linear-gradient(150deg, rgba(120, 164, 255, .32), rgba(40, 92, 226, .4));
+  --logo-lens: blur(1.5px) saturate(170%) brightness(1.06);
+  --logo-shadow: rgba(16, 60, 90, .42);
+  --logo-depth: rgba(20, 50, 150, .22);
+}
+
+/* Too narrow for logo, nav and switch in one row: the nav drops below them,
+   clear of the lens that hangs under the switch. */
+@media (max-width: 540px) {
+  .shell { padding-top: 88px; }
+  .nav { top: 88px; }
 }
 
 :root[data-theme='light'] {
@@ -1220,7 +1561,6 @@ input.note-title,
 }
 [data-theme='light'] .liquid-toggle__drop,
 [data-theme='light'] .btn,
-[data-theme='light'] .theme-toggle,
 [data-theme='light'] .modal__close,
 [data-theme='light'] .check {
   --bubble-top: 102,224,202;

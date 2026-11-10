@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { pinLeaving, trackGlassPointer } from "@/glass"
+import { lensOffset, pinLeaving, trackGlassPointer } from "@/glass"
 
 const movePointer = (target: Element, clientX: number, clientY: number) =>
   target.dispatchEvent(
@@ -27,6 +27,36 @@ describe("trackGlassPointer", () => {
     movePointer(plain, 5, 5)
 
     expect(plain.style.getPropertyValue("--mx")).toBe("")
+  })
+})
+
+describe("lensOffset", () => {
+  // A 56x66 lens with 25px corners that bends the outer 10px.
+  const at = (x: number, y: number) => lensOffset(x, y, 56, 66, 25, 10)
+
+  it("leaves the middle of the lens flat", () => {
+    expect(at(28, 33)).toEqual([0, 0])
+    expect(at(10, 33)).toEqual([0, 0])
+  })
+
+  it("bends hardest at the rim, pointing inward", () => {
+    expect(at(0, 33)).toEqual([1, 0])
+    expect(at(56, 33)).toEqual([-1, 0])
+    expect(at(28, 0)).toEqual([0, 1])
+    expect(at(28, 66)).toEqual([0, -1])
+  })
+
+  it("eases off across the rim band", () => {
+    const [x] = at(5, 33)
+    expect(x).toBeCloseTo(0.25)
+  })
+
+  it("follows the corner's curve", () => {
+    // On the top-left corner arc, 45 degrees round from the top.
+    const onArc = 25 - 25 * Math.SQRT1_2
+    const [x, y] = at(onArc, onArc)
+    expect(x).toBeCloseTo(Math.SQRT1_2)
+    expect(y).toBeCloseTo(Math.SQRT1_2)
   })
 })
 

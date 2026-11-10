@@ -3,9 +3,11 @@ import { initialRoute } from '@/navigation'
 import List from '@/views/List.vue'
 import Note from '@/views/Note.vue'
 import Shared from '@/views/Shared.vue'
+import About from '@/views/About.vue'
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/shared', name: 'Shared', component: Shared },
+  { path: '/about', name: 'About', component: About },
   {
     path: '/',
     name: 'List',
