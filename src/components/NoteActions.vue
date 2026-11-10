@@ -1,23 +1,11 @@
 <template>
-  <button
-    class="btn btn-primary text-success mr-2 mb-2"
-    type="button"
-    @click="callModalDialog('save')"
-  >
+  <button class="btn btn--accent" type="button" @click="callModalDialog('save')">
     Save
   </button>
-  <button
-    class="btn btn-primary text-info mr-2 mb-2"
-    type="button"
-    @click="callModalDialog('cancel')"
-  >
+  <button class="btn" type="button" @click="callModalDialog('cancel')">
     Cancel
   </button>
-  <button
-    class="btn btn-primary text-danger mr-2 mb-2"
-    type="button"
-    @click="callModalDialog('delete')"
-  >
+  <button class="btn btn--danger" type="button" @click="callModalDialog('delete')">
     Delete
   </button>
   <modal-window :show="showModal" @onClose="closeModal">
@@ -27,22 +15,14 @@
     <template v-slot:modal-body>
       {{ modalBody }}
     </template>
-    <template v-slot:modal-actions
-      ><button
-        type="button"
-        class="btn btn-primary text-success"
-        @click="Confirm(true)"
-      >
+    <template v-slot:modal-actions>
+      <button type="button" class="btn btn--accent" @click="Confirm(true)">
         Confirm
       </button>
-      <button
-        type="button"
-        class="btn btn-primary text-danger ml-auto"
-        @click="Confirm(false)"
-      >
+      <button type="button" class="btn" @click="Confirm(false)">
         Cancel
-      </button></template
-    >
+      </button>
+    </template>
   </modal-window>
 </template>
 
@@ -58,11 +38,9 @@
       ModalWindow
     },
     setup() {
-      // const note = computed(() => store.state.currentNote)
-
       const showModal = ref(false)
-      const modalTitle = ref("Modal Title")
-      const modalBody = ref("Modal Body")
+      const modalTitle = ref("")
+      const modalBody = ref("")
       const action = ref("")
 
       const Confirm = (permission: boolean) => {
@@ -91,20 +69,20 @@
         showModal.value = true
         switch (value) {
           case "delete":
-            modalTitle.value = "Do you realy want to delete this Note?"
-            modalBody.value = "You will be redirected to main page after this."
+            modalTitle.value = "Delete this note?"
+            modalBody.value = "You will go back to the list of notes."
             break
 
           case "save":
-            modalTitle.value = "Your Note is saved!"
+            modalTitle.value = "Note saved"
             modalBody.value =
-              "Do you want to exit to the main page? To continue edit this note, please click Cancel!"
+              "Confirm to go back to the list of notes, or Cancel to keep editing."
             saveNote()
             break
 
           case "cancel":
-            modalTitle.value = "Do you realy want to cancel this Note?"
-            modalBody.value = "All unsaved changes will be lost!"
+            modalTitle.value = "Leave without saving?"
+            modalBody.value = "All unsaved changes will be lost."
             break
 
           default:
@@ -112,11 +90,10 @@
             break
         }
       }
+      // Only hide the dialog here: its text must stay put while it animates out.
       const closeModal = () => {
         showModal.value = false
         action.value = ""
-        modalTitle.value = ""
-        modalBody.value = ""
       }
 
       const saveNote = () => {

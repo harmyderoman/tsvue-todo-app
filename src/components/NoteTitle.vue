@@ -1,20 +1,26 @@
 <template>
-  <h3 v-if="!editable" @click="editable = !editable" class="title-font">
+  <h3
+    v-if="!editable"
+    class="note-title"
+    :class="{ 'is-placeholder': !title }"
+    @click="editable = true"
+  >
     {{ title ? title : "Click to edit Title" }}
   </h3>
   <input
-    ref="titleRef"
-    class="form-control title-font"
     v-else
+    ref="titleRef"
+    class="note-title"
     type="text"
+    aria-label="Note title"
     :value="title"
     @input="onTextChange"
-    @keyup.enter="editable = !editable"
+    @keyup.enter="editable = false"
   />
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref } from "vue"
+  import { defineComponent, nextTick, ref, watch } from "vue"
   import { onClickOutside } from "@vueuse/core"
 
   export default defineComponent({
@@ -25,8 +31,9 @@
         required: false
       }
     },
+    emits: ["update-title"],
     setup() {
-      const titleRef = ref(null)
+      const titleRef = ref<HTMLInputElement | null>(null)
       const editable = ref(false)
 
       onClickOutside(titleRef, () => {
@@ -35,20 +42,18 @@
         }
       })
 
+      watch(editable, async (isEditable) => {
+        if (!isEditable) return
+        await nextTick()
+        titleRef.value?.focus()
+      })
+
       return { titleRef, editable }
     },
     methods: {
-      onTextChange(e: { target: { value: string } }) {
-        this.$emit("update-title", e.target.value)
+      onTextChange(e: Event) {
+        this.$emit("update-title", (e.target as HTMLInputElement).value)
       }
     }
   })
 </script>
-
-<style scoped>
-  .title-font {
-    font-size: calc(1.3rem + 0.6vw) !important;
-    font-weight: 400 !important;
-    padding: 0.83rem !important;
-  }
-</style>

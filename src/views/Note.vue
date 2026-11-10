@@ -1,38 +1,41 @@
 <template>
-  <div class="card shadow-inset bg-primary border-light p-4 rounded">
-    <div class="d-flex justify-content-start mb-3">
-      <div class="col"><undo-redo-buttons /></div>
+  <main class="editor glass">
+    <div class="editor__bar">
+      <undo-redo-buttons />
     </div>
 
-    <div class="card bg-primary border-light shadow-soft p-4">
-      <note-title :title="note.title" @update-title="updateTitle" />
+    <note-title :title="note.title" @update-title="updateTitle" />
 
-      <ul>
-        <TodoItem
-          v-for="(todo, index) in note.todos"
-          :todo="todo"
-          :key="index"
-          @remove-todo="onRemoveTodo(index)"
-          @update-todo="onUpdateTodo($event, index)"
-          @checkbox-click="onCheckboxClick($event, index)"
-        />
-      </ul>
+    <transition-group
+      tag="ul"
+      class="todos"
+      name="rise"
+      @before-leave="pinLeaving"
+    >
+      <TodoItem
+        v-for="(todo, index) in note.todos"
+        :todo="todo"
+        :key="todoKeys[index]"
+        @remove-todo="onRemoveTodo(index)"
+        @update-todo="onUpdateTodo($event, index)"
+        @checkbox-click="onCheckboxClick($event, index)"
+      />
+    </transition-group>
 
-      <div>
-        <button class="btn btn-primary text-info mr-2 mb-2" @click="addNewTodo">
-          Add Todo
-        </button>
-      </div>
+    <div>
+      <button class="btn" type="button" @click="addNewTodo">
+        <span aria-hidden="true">+</span> Add todo
+      </button>
     </div>
 
-    <div class="mt-4 d-flex justify-content-end">
+    <div class="editor__actions">
       <note-actions />
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
+  import { defineComponent, computed, onMounted, ref, nextTick, watch } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
 
   import NoteActions from "@/components/NoteActions.vue"
@@ -40,6 +43,8 @@
   import ToDo from "@/models/ToDoModel"
   import store from "@/store"
   import router from "@/router"
+  import { onBeforeRouteLeave } from "vue-router"
+  import { pinLeaving } from "@/glass"
   import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
   import NoteTitle from "@/components/NoteTitle.vue"
 
@@ -53,6 +58,20 @@
     },
     setup() {
       const note = computed(() => store.state.currentNote)
+
+      // Todos carry no id, so keep a parallel list of stable keys. Without it
+      // removing a row would animate the last row out instead of the removed one.
+      let nextKey = 0
+      const todoKeys = ref<number[]>(note.value.todos.map(() => nextKey++))
+      watch(
+        () => note.value.todos.length,
+        (length) => {
+          // Reconcile after changes made elsewhere (undo/redo, loading a note).
+          while (todoKeys.value.length < length) todoKeys.value.push(nextKey++)
+          todoKeys.value.length = length
+        },
+        { flush: "sync" }
+      )
 
       const { currentRoute } = router
       const fetchNote = async () => {
@@ -78,6 +97,7 @@
       }
 
       const onRemoveTodo = (index: number) => {
+        todoKeys.value.splice(index, 1)
         store.commit("deleteTodo", index)
       }
       const onUpdateTodo = (text: string, index: number) => {
@@ -100,37 +120,21 @@
         } as Note)
       }
 
+      onBeforeRouteLeave(() => {
+        clearNote()
+        store.commit("setCurrentId", store.getters.getIdOfLastNote + 1)
+      })
+
       return {
         note,
+        todoKeys,
         addNewTodo,
         onRemoveTodo,
         onUpdateTodo,
-        clearNote,
         updateTitle,
-        onCheckboxClick
+        onCheckboxClick,
+        pinLeaving
       }
-    },
-    beforeRouteLeave(to, from, next) {
-      this.clearNote()
-      store.commit("setCurrentId", store.getters.getIdOfLastNote + 1)
-      next()
     }
   })
 </script>
-
-<style>
-  .new-todo {
-    display: flex;
-    justify-content: flex-start;
-    background-color: #e2e2e2;
-    height: 36px;
-    margin: 5px 0px;
-    padding-top: 4px;
-    padding-left: 10px;
-    padding-right: 15px;
-    border-radius: 5px;
-  }
-  ul {
-    padding-inline-start: 5px;
-  }
-</style>

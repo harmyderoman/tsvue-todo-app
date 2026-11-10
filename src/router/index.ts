@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import List from '@/views/List.vue'
 import Note from '@/views/Note.vue'
 
@@ -20,10 +20,11 @@ const routes: Array<RouteRecordRaw> = [
   }
 ]
 
+// Hash history: GitHub Pages has no server-side fallback, so deep links
+// like /note/3 would 404 on reload with HTML5 history.
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(),
   routes
 })
 
 export default router
-

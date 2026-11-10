@@ -2,6 +2,9 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import "./assets/css/neumorphism.css";
+import { trackGlassPointer } from './glass'
+import './assets/css/main.css'
+
+trackGlassPointer()
 
 createApp(App).use(store).use(router).mount('#app')

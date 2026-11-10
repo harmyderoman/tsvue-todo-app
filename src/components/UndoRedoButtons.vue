@@ -1,19 +1,9 @@
 <template>
-  <button
-    class="btn btn-primary text-success mr-2 mb-2"
-    type="button"
-    :disabled="!canUndo"
-    @click="undo"
-  >
-    Undo
+  <button class="btn btn--sm" type="button" :disabled="!canUndo" @click="undo">
+    <span aria-hidden="true">↶</span> Undo
   </button>
-  <button
-    class="btn btn-primary text-info mr-2 mb-2"
-    type="button"
-    @click="redo"
-    :disabled="!canRedo"
-  >
-    Redo
+  <button class="btn btn--sm" type="button" :disabled="!canRedo" @click="redo">
+    <span aria-hidden="true">↷</span> Redo
   </button>
 </template>
 
@@ -22,6 +12,7 @@
   import store from "@/store"
 
   export default defineComponent({
+    name: "UndoRedoButtons",
     setup() {
       const canUndo = computed(() => store.getters.canUndo)
       const canRedo = computed(() => store.getters.canRedo)
