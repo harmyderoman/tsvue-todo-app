@@ -14,11 +14,7 @@
       <path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z" />
     </svg>
   </button>
-  <div class="tide" aria-hidden="true">
-    <span class="tide__pool tide__pool--lagoon"></span>
-    <span class="tide__pool tide__pool--coral"></span>
-    <span class="tide__pool tide__pool--periwinkle"></span>
-  </div>
+  <background-texture />
 
   <div class="shell">
     <liquid-toggle tag="nav" class="nav" aria-label="Main" :active="route.path">
@@ -49,10 +45,11 @@
   import { useRoute } from "vue-router"
   import { useDark } from "@vueuse/core"
   import LiquidToggle from "@/components/LiquidToggle.vue"
+  import BackgroundTexture from "@/components/BackgroundTexture.vue"
 
   export default defineComponent({
     name: "App",
-    components: { LiquidToggle },
+    components: { LiquidToggle, BackgroundTexture },
     setup() {
       const isDark = useDark({
         attribute: "data-theme",

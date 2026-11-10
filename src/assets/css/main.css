@@ -39,6 +39,7 @@
     rgba(255, 255, 255, 0.5)
   );
   --glass-blur: blur(26px) saturate(190%);
+  --card-fill: linear-gradient(145deg, rgba(255,255,255,.05), rgba(7,26,36,.07) 55%, rgba(255,255,255,.025));
   /* Thickness: a specular line under the top edge, a soft band of light below
      it, light pooling along the bottom, and a faint inner glow. */
   --glass-inset:
@@ -138,7 +139,7 @@ input {
 }
 
 /* --------------------------------------------------------------------------
-   Backdrop: three slow drifting pools of colour for the glass to refract
+   Backdrop: the clean embossed background layer extracted from the reference PSD
    -------------------------------------------------------------------------- */
 
 .tide {
@@ -146,61 +147,15 @@ input {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 50% 0%, #0d2d3c 0%, var(--ink) 45%, var(--ink-deep) 100%);
+  background: linear-gradient(145deg, #103235, #092327 50%, #05171d);
 }
 
-.tide__pool {
+.tide__texture {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.6;
-  will-change: transform;
-}
-
-.tide__pool--lagoon {
-  width: 52vmax;
-  height: 52vmax;
-  left: -14vmax;
-  top: -18vmax;
-  background: radial-gradient(circle at 35% 35%, var(--lagoon), transparent 68%);
-  animation: drift-a 26s ease-in-out infinite alternate;
-}
-
-.tide__pool--coral {
-  width: 44vmax;
-  height: 44vmax;
-  right: -12vmax;
-  top: 22vh;
-  background: radial-gradient(circle at 60% 40%, var(--coral), transparent 66%);
-  animation: drift-b 32s ease-in-out infinite alternate;
-}
-
-.tide__pool--periwinkle {
-  width: 48vmax;
-  height: 48vmax;
-  left: 18vw;
-  bottom: -26vmax;
-  background: radial-gradient(circle at 50% 50%, var(--periwinkle), transparent 68%);
-  animation: drift-c 38s ease-in-out infinite alternate;
-}
-
-@keyframes drift-a {
-  to {
-    transform: translate3d(16vw, 12vh, 0) scale(1.18) rotate(24deg);
-  }
-}
-
-@keyframes drift-b {
-  to {
-    transform: translate3d(-20vw, -14vh, 0) scale(0.86) rotate(-30deg);
-  }
-}
-
-@keyframes drift-c {
-  to {
-    transform: translate3d(12vw, -18vh, 0) scale(1.12) rotate(18deg);
-  }
+  inset: 0;
+  mix-blend-mode: soft-light;
+  opacity: .65;
+  pointer-events: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -218,6 +173,15 @@ input {
   backdrop-filter: var(--glass-blur);
 }
 
+.note-card,
+.note-row,
+.editor {
+  --glass-fill: var(--card-fill);
+  --glass-blur: blur(4px) saturate(135%);
+  --glass-sheen: .3;
+  --glass-hover-sheen: .6;
+}
+
 /* Broad caustics drift under the surface; a smaller lens follows the pointer. */
 .glass::before {
   content: '';
@@ -232,14 +196,14 @@ input {
     linear-gradient(115deg, transparent 30%, rgba(255,255,255,.2) 44%, transparent 57%);
   background-size: 100% 100%, 170% 180%, 180% 170%, 230% 100%;
   background-position: center, 0% 20%, 100% 80%, 100% 50%;
-  opacity: .55;
+  opacity: var(--glass-sheen, .55);
   animation: liquid-caustics 18s ease-in-out infinite alternate;
   transition: opacity .65s ease;
   pointer-events: none;
 }
 
 .glass:hover::before {
-  opacity: 1;
+  opacity: var(--glass-hover-sheen, 1);
 }
 
 @keyframes liquid-caustics {
@@ -1193,6 +1157,7 @@ input.note-title,
   --foam-faint: #536b77;
   --lagoon: #087c70;
   --periwinkle: #596bc7;
+  --card-fill: linear-gradient(145deg, rgba(255,255,255,.14), rgba(237,249,246,.05) 55%, rgba(255,255,255,.1));
   --glass-fill:
     radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.98), transparent 58%),
     linear-gradient(145deg, rgba(255,255,255,.76), rgba(221,237,241,.4) 52%, rgba(255,255,255,.72));
@@ -1209,10 +1174,13 @@ input.note-title,
 }
 
 [data-theme='light'] .tide {
-  background: radial-gradient(120% 90% at 50% 0%, #c4dfe6, #e8f0f3 65%, #f2f7f8);
+  background: linear-gradient(145deg, #bce2d8, #d4e9e2 50%, #e7f1e9);
 }
 
-[data-theme='light'] .tide__pool { opacity: .3; }
+[data-theme='light'] .tide__texture {
+  mix-blend-mode: multiply;
+  opacity: .72;
+}
 [data-theme='light'] .glass::before {
   background:
     radial-gradient(ellipse 150px 90px at var(--mx, 50%) var(--my, 0%), rgba(30,80,96,.22), transparent 72%),
