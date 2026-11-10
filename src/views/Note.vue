@@ -20,6 +20,7 @@
         @remove-todo="onRemoveTodo(index)"
         @update-todo="onUpdateTodo($event, index)"
         @checkbox-click="onCheckboxClick($event, index)"
+        @add-next="addNewTodo"
       />
     </transition-group>
 

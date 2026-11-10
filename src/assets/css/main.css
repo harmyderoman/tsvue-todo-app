@@ -113,6 +113,21 @@ input {
   color: inherit;
 }
 
+.share-link {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.share-link input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  background: var(--ink);
+  border: 1px solid var(--foam-faint);
+  border-radius: var(--r-sm);
+}
+
 :focus-visible {
   outline: 2px solid var(--lagoon);
   outline-offset: 3px;

@@ -72,8 +72,8 @@
         default: false
       }
     },
-    emits: ["remove-todo", "update-todo", "checkbox-click"],
-    setup(props) {
+    emits: ["remove-todo", "update-todo", "checkbox-click", "add-next"],
+    setup(props, { emit }) {
       const todoItem = ref<HTMLElement | null>(null)
       const textInput = ref<HTMLInputElement | null>(null)
       const displayRef = ref<HTMLButtonElement | null>(null)
@@ -95,12 +95,14 @@
         textInput.value?.focus()
       })
 
-      // Enter saves the text and closes the field. Focus stays on the row
-      // instead of dropping to <body>.
-      const finishWithKeyboard = async () => {
+      // Commit the row before the parent mounts and focuses the next one.
+      const finishWithKeyboard = async (event: KeyboardEvent) => {
+        if (event.isComposing || event.repeat) return
+        event.preventDefault()
         editable.value = false
         await nextTick()
         displayRef.value?.focus()
+        if (props.todo.text !== "") emit("add-next")
       }
 
       return { todoItem, textInput, displayRef, editable, finishWithKeyboard }

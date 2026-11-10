@@ -1,8 +1,10 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import List from '@/views/List.vue'
 import Note from '@/views/Note.vue'
+import Shared from '@/views/Shared.vue'
 
 const routes: Array<RouteRecordRaw> = [
+  { path: '/shared', name: 'Shared', component: Shared },
   {
     path: '/',
     name: 'List',

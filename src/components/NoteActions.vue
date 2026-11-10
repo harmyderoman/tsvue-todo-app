@@ -5,6 +5,7 @@
   <button class="btn btn--accent" type="button" @click="saveNote">
     Save
   </button>
+  <share-note />
   <button class="btn btn--quiet" type="button" @click="backToNotes">
     Back to notes
   </button>
@@ -37,12 +38,14 @@
   import { useNotesStore } from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
+  import ShareNote from "./ShareNote.vue"
 
   const SAVED_FLAG_MS = 2500
 
   export default defineComponent({
     name: "NoteActions",
     components: {
+      ShareNote,
       ModalWindow
     },
     setup() {

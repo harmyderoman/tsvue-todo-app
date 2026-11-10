@@ -102,7 +102,7 @@ describe("Note editor", () => {
       expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
     })
 
-    it("saves the text on Enter without adding another row", async () => {
+    it("saves the text on Enter and focuses a new row for continued typing", async () => {
       await openApp("/note")
       await buttonByText("+ Add todo").trigger("click")
       const input = wrapper.find<HTMLInputElement>(".todo__input")
@@ -111,9 +111,15 @@ describe("Note editor", () => {
       await input.trigger("keydown.enter")
       await flushPromises()
 
-      expect(store.currentNote.todos.map((todo) => todo.text)).toEqual(["Milk"])
-      expect(wrapper.find(".todo__input").exists()).toBe(false)
+      expect(store.currentNote.todos.map((todo) => todo.text)).toEqual(["Milk", ""])
+      expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
       expect(wrapper.find(".todo__text").text()).toBe("Milk")
+
+      await wrapper.find(".todo__input").setValue("Bread")
+      await wrapper.find(".todo__input").trigger("keydown.enter")
+      await flushPromises()
+      expect(store.currentNote.todos.map((todo) => todo.text)).toEqual(["Milk", "Bread", ""])
+      expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
     })
 
     it("locks Add todo while there is an empty todo", async () => {
