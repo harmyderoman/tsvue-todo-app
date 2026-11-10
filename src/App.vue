@@ -4,7 +4,8 @@
     type="button"
     :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
     :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
-    @click="isDark = !isDark"
+    :style="{ transform: `perspective(320px) rotateY(${themeRotation}deg)` }"
+    @click="toggleTheme"
   >
     <svg v-if="isDark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <circle cx="12" cy="12" r="4" />
@@ -21,9 +22,8 @@
   </div>
 
   <div class="shell">
-    <nav class="nav glass" aria-label="Main">
-      <ul ref="navList" class="nav__list">
-        <li class="nav__drop" :class="{ 'is-visible': dropVisible }" aria-hidden="true"></li>
+    <liquid-toggle tag="nav" class="nav" aria-label="Main" :active="route.path">
+      <ul class="nav__list">
         <li>
           <router-link class="nav__link" to="/" exact-active-class="is-active">
             Notes
@@ -35,7 +35,7 @@
           </router-link>
         </li>
       </ul>
-    </nav>
+    </liquid-toggle>
 
     <router-view v-slot="{ Component, route }">
       <transition name="melt" mode="out-in">
@@ -46,47 +46,29 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, nextTick, onMounted, ref, watch } from "vue"
-  import { useRoute, useRouter } from "vue-router"
-  import { useDark, useEventListener } from "@vueuse/core"
+  import { defineComponent, ref } from "vue"
+  import { useRoute } from "vue-router"
+  import { useDark } from "@vueuse/core"
+  import LiquidToggle from "@/components/LiquidToggle.vue"
 
   export default defineComponent({
     name: "App",
+    components: { LiquidToggle },
     setup() {
       const isDark = useDark({
         attribute: "data-theme",
         valueDark: "dark",
         valueLight: "light",
-        storageKey: "todo-app:theme"
+        storageKey: "todo-app:theme",
+        disableTransition: false
       })
-      const route = useRoute()
-      const router = useRouter()
-      const navList = ref<HTMLElement | null>(null)
-      const dropVisible = ref(false)
-
-      // Slide the droplet under whichever tab is active; hide it on routes
-      // that have no tab (editing an existing note).
-      const placeDrop = async () => {
-        await nextTick()
-        const list = navList.value
-        if (!list) return
-        const active = list.querySelector<HTMLElement>(".nav__link.is-active")
-        dropVisible.value = !!active
-        if (!active) return
-        list.style.setProperty("--drop-x", `${active.offsetLeft}px`)
-        list.style.setProperty("--drop-w", `${active.offsetWidth}px`)
+      const themeRotation = ref(0)
+      const toggleTheme = () => {
+        themeRotation.value += 360
+        isDark.value = !isDark.value
       }
-
-      watch(() => route.path, placeDrop)
-      onMounted(() => {
-        // The first route resolves after mount, so no tab is active before that.
-        router.isReady().then(placeDrop)
-        // Tab widths change once the web font arrives.
-        document.fonts?.ready.then(placeDrop)
-      })
-      useEventListener(window, "resize", placeDrop)
-
-      return { navList, dropVisible, isDark }
+      const route = useRoute()
+      return { route, isDark, themeRotation, toggleTheme }
     }
   })
 </script>

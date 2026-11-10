@@ -1,5 +1,5 @@
 <template>
-  <button class="btn btn--quiet" type="button" @click="share">Share</button>
+  <button class="btn btn--quiet btn--share" type="button" @click="share">Share</button>
   <span v-if="status" role="status">{{ status }}</span>
   <modal-window :show="showLink" @onClose="showLink = false">
     <template #modal-header>Share this note</template>

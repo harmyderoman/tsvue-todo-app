@@ -6,7 +6,7 @@
         <p class="page-head__count">
           {{ notes.length }} {{ notes.length === 1 ? "note" : "notes" }}
         </p>
-        <div class="view-toggle glass" role="group" aria-label="View">
+        <liquid-toggle class="view-toggle" role="group" aria-label="View" :active="view">
           <button
             v-for="option in VIEWS"
             :key="option.value"
@@ -18,7 +18,7 @@
           >
             {{ option.label }}
           </button>
-        </div>
+        </liquid-toggle>
       </div>
     </header>
 
@@ -151,6 +151,7 @@
 
 <script lang="ts">
   import ModalWindow from "@/components/ModalWindow.vue"
+  import LiquidToggle from "@/components/LiquidToggle.vue"
   import Note from "@/models/NoteModel"
   import { useNotesStore } from "@/store"
   import { pinLeaving } from "@/glass"
@@ -173,7 +174,7 @@
 
   export default defineComponent({
     name: "List",
-    components: { ModalWindow },
+    components: { ModalWindow, LiquidToggle },
     setup() {
       const store = useNotesStore()
       const notes = computed(() => store.notes)
