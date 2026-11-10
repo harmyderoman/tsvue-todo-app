@@ -75,6 +75,33 @@ describe("ToDoItem", () => {
     expect(wrapper.find(".todo__input").exists()).toBe(false)
   })
 
+  it("saves on Enter: closes the field and keeps focus on the row", async () => {
+    const wrapper = mount(ToDoItem, {
+      props: { todo: { text: "Buy milk", completed: false } },
+      attachTo: document.body
+    })
+
+    await wrapper.find(".todo__text").trigger("click")
+    await wrapper.find(".todo__input").trigger("keydown.enter")
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find(".todo__input").exists()).toBe(false)
+    expect(document.activeElement).toBe(wrapper.find(".todo__text").element)
+
+    wrapper.unmount()
+  })
+
+  it("opens focused and ready for typing when startEditing is set", () => {
+    const wrapper = mount(ToDoItem, {
+      props: { todo: { text: "", completed: false }, startEditing: true },
+      attachTo: document.body
+    })
+
+    expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
+
+    wrapper.unmount()
+  })
+
   it("emits remove-todo with the todo", async () => {
     const wrapper = mountTodo()
 

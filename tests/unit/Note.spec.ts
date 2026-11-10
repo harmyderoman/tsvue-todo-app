@@ -93,6 +93,134 @@ describe("Note editor", () => {
       await buttonByText("+ Add todo").trigger("click")
       expect(wrapper.findAll(".todo")).toHaveLength(3)
     })
+
+    it("opens a new row with the cursor already in it", async () => {
+      await openApp("/note")
+
+      await buttonByText("+ Add todo").trigger("click")
+
+      expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
+    })
+
+    it("saves the text on Enter without adding another row", async () => {
+      await openApp("/note")
+      await buttonByText("+ Add todo").trigger("click")
+      const input = wrapper.find<HTMLInputElement>(".todo__input")
+
+      await input.setValue("Milk")
+      await input.trigger("keydown.enter")
+      await flushPromises()
+
+      expect(store.currentNote.todos.map((todo) => todo.text)).toEqual(["Milk"])
+      expect(wrapper.find(".todo__input").exists()).toBe(false)
+      expect(wrapper.find(".todo__text").text()).toBe("Milk")
+    })
+
+    it("locks Add todo while there is an empty todo", async () => {
+      await openApp("/note")
+      const addTodo = () => buttonByText("+ Add todo")
+      expect(addTodo().attributes("disabled")).toBeUndefined()
+
+      await addTodo().trigger("click")
+      expect(addTodo().attributes("disabled")).toBeDefined()
+      expect(addTodo().attributes("title")).toBe("Fill in the empty todo first")
+
+      // A click that gets through anyway must not add a second blank row.
+      await addTodo().trigger("click")
+      expect(wrapper.findAll(".todo")).toHaveLength(1)
+
+      await wrapper.find(".todo__input").setValue("Milk")
+      expect(addTodo().attributes("disabled")).toBeUndefined()
+      expect(addTodo().attributes("title")).toBeUndefined()
+    })
+
+    it("locks Add todo for an empty todo left closed, too", async () => {
+      const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+      await openApp(`/note/${id}`)
+      await buttonByText("+ Add todo").trigger("click")
+
+      // Enter closes the still-empty row; it stays in the list as a blank.
+      await wrapper.find(".todo__input").trigger("keydown.enter")
+      await flushPromises()
+
+      expect(wrapper.find(".todo__input").exists()).toBe(false)
+      expect(buttonByText("+ Add todo").attributes("disabled")).toBeDefined()
+    })
+  })
+
+  describe("keyboard undo", () => {
+    const press = (target: EventTarget, init: KeyboardEventInit) =>
+      target.dispatchEvent(
+        new KeyboardEvent("keydown", { bubbles: true, cancelable: true, ...init })
+      )
+
+    const openEditedNote = async () => {
+      const id = seedNote(store, "Groceries", [])
+      await openApp(`/note/${id}`)
+      store.updateTitle("Changed")
+      await flushPromises()
+    }
+
+    it("undoes with Ctrl+Z and redoes with Ctrl+Shift+Z or Ctrl+Y", async () => {
+      await openEditedNote()
+
+      press(document.body, { key: "z", ctrlKey: true })
+      await flushPromises()
+      expect(store.currentNote.title).toBe("Groceries")
+
+      press(document.body, { key: "Z", ctrlKey: true, shiftKey: true })
+      await flushPromises()
+      expect(store.currentNote.title).toBe("Changed")
+
+      press(document.body, { key: "z", metaKey: true })
+      await flushPromises()
+      press(document.body, { key: "y", ctrlKey: true })
+      await flushPromises()
+      expect(store.currentNote.title).toBe("Changed")
+    })
+
+    it("undoes and redoes a completion change while the checkbox has focus", async () => {
+      const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+      await openApp(`/note/${id}`)
+      const checkbox = wrapper.find<HTMLInputElement>("input[type='checkbox']")
+      checkbox.element.focus()
+      await checkbox.setValue(true)
+      await flushPromises()
+      expect(store.currentNote.todos[0].completed).toBe(true)
+
+      press(checkbox.element, { key: "z", ctrlKey: true })
+      await flushPromises()
+      expect(store.currentNote.todos[0].completed).toBe(false)
+      expect(checkbox.element.checked).toBe(false)
+      expect(document.activeElement).toBe(checkbox.element)
+
+      press(checkbox.element, { key: "Z", ctrlKey: true, shiftKey: true })
+      await flushPromises()
+      expect(store.currentNote.todos[0].completed).toBe(true)
+      expect(checkbox.element.checked).toBe(true)
+    })
+
+    it("leaves Ctrl+Z to the browser inside a text field", async () => {
+      await openEditedNote()
+      await wrapper.find("h1 button").trigger("click")
+
+      press(wrapper.find("input.note-title").element, { key: "z", ctrlKey: true })
+      await flushPromises()
+
+      expect(store.currentNote.title).toBe("Changed")
+    })
+
+    it("does nothing while a dialog is open", async () => {
+      await openEditedNote()
+      await buttonByText("Back to notes").trigger("click")
+      await flushPromises()
+      expect(wrapper.find(".modal").exists()).toBe(true)
+
+      press(document.body, { key: "z", ctrlKey: true })
+      await flushPromises()
+
+      expect(store.currentNote.title).toBe("Changed")
+    })
   })
 
   describe("saving", () => {

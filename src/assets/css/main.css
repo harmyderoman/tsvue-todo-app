@@ -18,19 +18,38 @@
   --foam-faint: rgba(238, 248, 246, 0.62);
 
   /* glass */
-  --glass-fill: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.17),
-    rgba(255, 255, 255, 0.05) 55%,
-    rgba(255, 255, 255, 0.09)
+  /* A sheen pooled in the top-left corner over a body that thins out in
+     the middle and catches light again at the far edge. */
+  --glass-fill:
+    radial-gradient(130% 80% at 12% -12%, rgba(255, 255, 255, 0.26), transparent 56%),
+    linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.16),
+      rgba(255, 255, 255, 0.04) 48%,
+      rgba(255, 255, 255, 0.02) 62%,
+      rgba(255, 255, 255, 0.13)
+    );
+  /* Rim light: bright where the light enters (top-left) and where it leaves
+     (bottom-right), nearly invisible in between. Drawn by .glass::after. */
+  --glass-rim: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.1) 28%,
+    rgba(255, 255, 255, 0.04) 62%,
+    rgba(255, 255, 255, 0.5)
   );
-  --glass-edge: rgba(255, 255, 255, 0.24);
-  --glass-blur: blur(22px) saturate(175%);
-  --glass-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 28px rgba(255, 255, 255, 0.05),
-    0 24px 60px -22px rgba(0, 0, 0, 0.65);
+  --glass-blur: blur(26px) saturate(190%);
+  /* Thickness: a specular line under the top edge, a soft band of light below
+     it, light pooling along the bottom, and a faint inner glow. */
+  --glass-inset:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 16px 26px -20px rgba(255, 255, 255, 0.45),
+    inset 0 -18px 28px -18px rgba(255, 255, 255, 0.16),
+    inset 0 0 30px rgba(255, 255, 255, 0.05);
+  --glass-drop:
+    0 2px 5px rgba(0, 0, 0, 0.28),
+    0 30px 70px -24px rgba(0, 0, 0, 0.75);
+  --glass-shadow: var(--glass-inset), var(--glass-drop);
 
   /* type */
   --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
@@ -177,7 +196,7 @@ input {
   position: relative;
   isolation: isolate;
   background: var(--glass-fill);
-  border: 1px solid var(--glass-edge);
+  border: 1px solid transparent;
   border-radius: var(--r-md);
   box-shadow: var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -192,8 +211,8 @@ input {
   z-index: -1;
   border-radius: inherit;
   background: radial-gradient(
-    260px circle at var(--mx, 50%) var(--my, 0%),
-    rgba(255, 255, 255, 0.22),
+    280px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 255, 255, 0.3),
     transparent 62%
   );
   opacity: 0;
@@ -205,20 +224,39 @@ input {
   opacity: 1;
 }
 
+/* The rim: a 1px ring painted with --glass-rim. The mask keeps only the ring. */
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--glass-rim);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass {
     background: rgba(22, 56, 70, 0.92);
   }
 }
 
-/* Recessed well cut into a glass pane */
+/* Recessed well carved into a glass pane: shaded under its top lip, lit
+   along its bottom lip. */
 .well {
-  background: rgba(3, 13, 19, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(3, 13, 19, 0.32);
   border-radius: var(--r-sm);
   box-shadow:
-    inset 0 2px 8px rgba(0, 0, 0, 0.35),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 2px 7px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* --------------------------------------------------------------------------
@@ -307,48 +345,59 @@ input {
 
 .btn {
   --btn-tint: rgba(255, 255, 255, 0.12);
+  --btn-gloss: 0.42;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   padding: 10px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 0;
   border-radius: 999px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), var(--btn-tint));
+  /* layers, top to bottom: gloss on the upper half, light caught along the
+     bottom, the tint that gives the button its colour */
+  background:
+    radial-gradient(120% 95% at 50% -25%, rgba(255, 255, 255, var(--btn-gloss)), transparent 64%),
+    radial-gradient(90% 70% at 50% 125%, rgba(255, 255, 255, 0.2), transparent 70%),
+    linear-gradient(var(--btn-tint), var(--btn-tint));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 8px 20px -10px rgba(0, 0, 0, 0.6);
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -7px 10px -7px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 10px 22px -10px rgba(0, 0, 0, 0.7);
   font-weight: 500;
   line-height: 1.2;
   color: var(--foam);
   text-decoration: none;
   cursor: pointer;
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
-  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
+  backdrop-filter: blur(12px) saturate(170%);
   transition:
     transform 0.35s var(--spring),
     box-shadow 0.3s ease,
-    border-color 0.3s ease,
-    opacity 0.3s ease;
+    filter 0.3s ease;
 }
 
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.42);
+  filter: brightness(1.18);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 14px 26px -12px rgba(0, 0, 0, 0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -7px 10px -7px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 16px 28px -12px rgba(0, 0, 0, 0.8);
 }
 
+/* Pressed in: the gloss goes and the shadow moves inside. */
 .btn:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: translateY(1px) scale(0.97);
+  filter: brightness(0.95);
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
   transition-duration: 0.1s;
-}
-
-.btn:disabled {
-  opacity: 0.38;
-  cursor: not-allowed;
 }
 
 .btn--sm {
@@ -357,17 +406,39 @@ input {
 }
 
 .btn--accent {
-  --btn-tint: rgba(53, 224, 200, 0.34);
-  border-color: rgba(53, 224, 200, 0.55);
+  --btn-tint: rgba(53, 224, 200, 0.45);
 }
 
 .btn--danger {
-  --btn-tint: rgba(255, 111, 138, 0.2);
+  --btn-tint: rgba(255, 111, 138, 0.3);
   color: #ffc2cd;
 }
 
-.btn--danger:hover:not(:disabled) {
-  border-color: rgba(255, 111, 138, 0.7);
+/* Secondary actions: the same bead, thinner and clearer, so they sit behind
+   the primary action without going flat. */
+.btn--quiet {
+  --btn-tint: rgba(255, 255, 255, 0.04);
+  --btn-gloss: 0.22;
+}
+
+.btn--quiet.btn--danger {
+  --btn-tint: rgba(255, 111, 138, 0.14);
+}
+
+/* Disabled: glass with the light switched off. No gloss, no lift, a matte
+   hatched face sunk below the surface. It reads as "not now" by shape and
+   texture, not just by being fainter. */
+.btn:disabled {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.08) 0 5px,
+    rgba(255, 255, 255, 0.02) 5px 10px
+  );
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.45);
+  color: rgba(238, 248, 246, 0.45);
+  cursor: not-allowed;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -386,9 +457,52 @@ input {
   font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4rem);
 }
 
+.page-head__tools {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .page-head__count {
   color: var(--foam-dim);
   white-space: nowrap;
+}
+
+/* Cards / List switch: a small glass capsule, the chosen side raised */
+.view-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.view-toggle__btn {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foam-dim);
+  cursor: pointer;
+  transition:
+    color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.view-toggle__btn:hover {
+  color: var(--foam);
+}
+
+.view-toggle__btn.is-active {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.34), rgba(53, 224, 200, 0.22));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -5px 10px -5px rgba(53, 224, 200, 0.35),
+    0 6px 16px -6px rgba(53, 224, 200, 0.55);
+  color: var(--foam);
+  cursor: default;
 }
 
 /* --------------------------------------------------------------------------
@@ -417,10 +531,9 @@ input {
 .note-card:hover {
   transform: translateY(-5px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 28px rgba(255, 255, 255, 0.07),
-    0 34px 70px -24px rgba(0, 0, 0, 0.75);
+    var(--glass-inset),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 44px 80px -26px rgba(0, 0, 0, 0.85);
 }
 
 .note-card__title {
@@ -451,12 +564,11 @@ input {
   top: 0.45em;
   width: 10px;
   height: 10px;
-  border: 1.5px solid var(--foam-faint);
   border-radius: 50%;
+  background: rgba(238, 248, 246, 0.28);
 }
 
 .note-card__todo.completed::before {
-  border-color: var(--lagoon);
   background: var(--lagoon);
   box-shadow: 0 0 10px rgba(53, 224, 200, 0.7);
 }
@@ -477,8 +589,10 @@ input {
 .meter {
   height: 6px;
   border-radius: 999px;
-  background: rgba(3, 13, 19, 0.4);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  background: rgba(3, 13, 19, 0.45);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
 
@@ -486,7 +600,9 @@ input {
   height: 100%;
   width: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--periwinkle), var(--lagoon));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(90deg, var(--periwinkle), var(--lagoon));
   box-shadow: 0 0 12px rgba(53, 224, 200, 0.6);
   transform-origin: left;
   transform: scaleX(var(--done, 0));
@@ -497,6 +613,75 @@ input {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+/* List view: one glass strip per note with just its title and progress */
+.notes--list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.note-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  padding: 16px 22px;
+  border-radius: var(--r-md);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.45s var(--glide),
+    box-shadow 0.45s ease;
+}
+
+.note-row:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    var(--glass-inset),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 30px 60px -24px rgba(0, 0, 0, 0.85);
+}
+
+.note-row__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-row__title.is-untitled {
+  color: var(--foam-faint);
+}
+
+.note-row__progress {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.note-row .meter {
+  display: block;
+  width: 160px;
+}
+
+.note-row .meter__fill {
+  display: block;
+}
+
+.note-row__count {
+  flex-shrink: 0;
+  min-width: 6.5em;
+  font-size: 0.875rem;
+  color: var(--foam-dim);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .empty {
@@ -540,8 +725,7 @@ input {
 .editor__actions {
   align-items: center;
   justify-content: flex-end;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 12px;
 }
 
 /* Confirmation that appears next to the actions after Save */
@@ -565,7 +749,7 @@ input {
   margin: 0;
   padding: 8px 12px;
   width: 100%;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--r-sm);
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem);
@@ -599,10 +783,8 @@ button.note-title:hover {
 input.note-title,
 .todo__input {
   background: rgba(3, 13, 19, 0.3);
-  border: 1px solid rgba(53, 224, 200, 0.55);
-  box-shadow:
-    inset 0 2px 8px rgba(0, 0, 0, 0.35),
-    0 0 0 4px rgba(53, 224, 200, 0.14);
+  border: 0;
+  box-shadow: 0 0 0 2px rgba(53, 224, 200, 0.6);
   outline: none;
 }
 
@@ -683,7 +865,9 @@ input.note-title,
       center / 0 no-repeat,
     radial-gradient(circle, var(--lagoon) 60%, transparent 62%) center / 0 0 no-repeat,
     rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.35);
   cursor: pointer;
   transition:
     background-size 0.45s var(--glide),
@@ -701,7 +885,8 @@ input.note-title,
   border-color: var(--lagoon);
   background-size: 100%, 180% 180%, auto;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 2px 2px rgba(255, 255, 255, 0.6),
+    inset 0 -3px 4px rgba(0, 60, 60, 0.35),
     0 0 16px rgba(53, 224, 200, 0.6);
   animation: bead-pop 0.5s var(--spring);
 }
@@ -907,6 +1092,28 @@ input.note-title,
 
   .todo__actions {
     margin-left: auto;
+  }
+
+  .page-head {
+    flex-wrap: wrap;
+  }
+
+  .note-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .note-row__title {
+    flex-basis: 100%;
+  }
+
+  .note-row__progress {
+    flex: 1;
+  }
+
+  .note-row .meter {
+    flex: 1;
+    width: auto;
   }
 }
 

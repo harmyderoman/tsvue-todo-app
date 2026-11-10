@@ -32,6 +32,21 @@ describe("notes store", () => {
       ])
     })
 
+    it("adds the todo at the end and returns its id", () => {
+      store.currentNote = {
+        title: "",
+        todos: [{ text: "first", completed: false }]
+      }
+
+      const id = store.addTodo()
+
+      expect(store.currentNote.todos.map((todo) => todo.text)).toEqual([
+        "first",
+        ""
+      ])
+      expect(store.currentNote.todos[1].id).toBe(id)
+    })
+
     it("changes only the given fields of a todo", () => {
       store.currentNote = {
         title: "",

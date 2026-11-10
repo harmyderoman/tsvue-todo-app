@@ -38,14 +38,14 @@
       <button
         type="button"
         class="btn btn--sm"
-        :class="{ 'btn--accent': editable }"
+        :class="editable ? 'btn--accent' : 'btn--quiet'"
         @click="editable = !editable"
       >
         {{ editable ? "Save" : "Edit" }}
       </button>
       <button
         type="button"
-        class="btn btn--sm btn--danger"
+        class="btn btn--sm btn--quiet btn--danger"
         @click="$emit('remove-todo', todo)"
       >
         Delete
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, nextTick, PropType, ref, watch } from "vue"
+  import { defineComponent, nextTick, onMounted, PropType, ref, watch } from "vue"
   import ToDo from "@/models/ToDoModel"
   import { onClickOutside } from "@vueuse/core"
 
@@ -65,14 +65,23 @@
       todo: {
         type: Object as PropType<ToDo>,
         required: true
+      },
+      /** Open the text field straight away: used for a row that was just added. */
+      startEditing: {
+        type: Boolean,
+        default: false
       }
     },
     emits: ["remove-todo", "update-todo", "checkbox-click"],
-    setup() {
+    setup(props) {
       const todoItem = ref<HTMLElement | null>(null)
       const textInput = ref<HTMLInputElement | null>(null)
       const displayRef = ref<HTMLButtonElement | null>(null)
-      const editable = ref(false)
+      const editable = ref(props.startEditing)
+
+      onMounted(() => {
+        if (editable.value) textInput.value?.focus()
+      })
 
       onClickOutside(todoItem, () => {
         if (editable.value) {
@@ -86,7 +95,8 @@
         textInput.value?.focus()
       })
 
-      // Keep keyboard users where they were instead of dropping focus to <body>.
+      // Enter saves the text and closes the field. Focus stays on the row
+      // instead of dropping to <body>.
       const finishWithKeyboard = async () => {
         editable.value = false
         await nextTick()

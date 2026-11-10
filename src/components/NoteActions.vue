@@ -5,12 +5,12 @@
   <button class="btn btn--accent" type="button" @click="saveNote">
     Save
   </button>
-  <button class="btn" type="button" @click="backToNotes">
+  <button class="btn btn--quiet" type="button" @click="backToNotes">
     Back to notes
   </button>
   <button
     v-if="store.isSavedNote"
-    class="btn btn--danger"
+    class="btn btn--quiet btn--danger"
     type="button"
     @click="showModal = true"
   >
@@ -25,7 +25,7 @@
       <button type="button" class="btn btn--danger" @click="deleteNote">
         Delete
       </button>
-      <button type="button" class="btn" @click="showModal = false">
+      <button type="button" class="btn btn--quiet" @click="showModal = false">
         Cancel
       </button>
     </template>

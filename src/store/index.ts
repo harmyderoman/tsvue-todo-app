@@ -113,8 +113,11 @@ export const useNotesStore = defineStore('notes', () => {
   function updateTitle(title: string): void {
     currentNote.value.title = title
   }
-  function addTodo(): void {
-    currentNote.value.todos.push(withTodoId({ text: '', completed: false }))
+  /** Adds an empty todo at the end and returns its id. */
+  function addTodo(): number {
+    const todo = withTodoId({ text: '', completed: false })
+    currentNote.value.todos.push(todo)
+    return todo.id as number
   }
   function updateTodo(index: number, changes: Partial<ToDo>): void {
     const todos = currentNote.value.todos

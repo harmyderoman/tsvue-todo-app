@@ -16,6 +16,7 @@
         v-for="(todo, index) in note.todos"
         :todo="todo"
         :key="todo.id ?? index"
+        :start-editing="todo.id === newTodoId"
         @remove-todo="onRemoveTodo(index)"
         @update-todo="onUpdateTodo($event, index)"
         @checkbox-click="onCheckboxClick($event, index)"
@@ -23,7 +24,13 @@
     </transition-group>
 
     <div>
-      <button class="btn" type="button" @click="addNewTodo">
+      <button
+        class="btn"
+        type="button"
+        :disabled="hasEmptyTodo"
+        :title="hasEmptyTodo ? 'Fill in the empty todo first' : undefined"
+        @click="addNewTodo"
+      >
         <span aria-hidden="true">+</span> Add todo
       </button>
     </div>
@@ -41,7 +48,7 @@
         <button type="button" class="btn btn--danger" @click="leave">
           Leave
         </button>
-        <button type="button" class="btn" @click="keepEditing">
+        <button type="button" class="btn btn--quiet" @click="keepEditing">
           Keep editing
         </button>
       </template>
@@ -59,6 +66,7 @@
   import router from "@/router"
   import { onBeforeRouteLeave } from "vue-router"
   import { pinLeaving } from "@/glass"
+  import { useEventListener } from "@vueuse/core"
   import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
   import NoteTitle from "@/components/NoteTitle.vue"
 
@@ -103,9 +111,37 @@
         store.updateTitle(title)
       }
 
-      const addNewTodo = () => {
-        store.addTodo()
+      // The row that was just added opens ready for typing. The id is only
+      // needed while that row mounts; clearing it keeps a row brought back by
+      // redo from reopening.
+      const newTodoId = ref<number | null>(null)
+      // One blank row at a time: a second one would only be dropped on Save.
+      const hasEmptyTodo = computed(() =>
+        note.value.todos.some((todo) => todo.text === "")
+      )
+      const addNewTodo = async () => {
+        if (hasEmptyTodo.value) return
+        newTodoId.value = store.addTodo()
+        await nextTick()
+        newTodoId.value = null
       }
+
+      // Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) for the note's own history.
+      // Inside a text field the browser's undo is left alone, and a dialog
+      // on screen means the note is not what the user is working on.
+      useEventListener(document, "keydown", (event: KeyboardEvent) => {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey) return
+        const key = event.key.toLowerCase()
+        const wantsRedo = key === "y" || (key === "z" && event.shiftKey)
+        const wantsUndo = key === "z" && !event.shiftKey
+        if (!wantsUndo && !wantsRedo) return
+        const target = event.target as HTMLElement | null
+        if (target?.closest("input:not([type='checkbox']), textarea, [contenteditable]")) return
+        if (document.querySelector("[aria-modal='true']")) return
+        event.preventDefault()
+        if (wantsUndo) store.undo()
+        else store.redo()
+      })
 
       const onRemoveTodo = (index: number) => {
         store.removeTodo(index)
@@ -141,6 +177,8 @@
         pendingPath,
         leave,
         keepEditing,
+        newTodoId,
+        hasEmptyTodo,
         addNewTodo,
         onRemoveTodo,
         onUpdateTodo,

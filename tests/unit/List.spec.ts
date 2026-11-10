@@ -115,4 +115,85 @@ describe("List", () => {
     expect(wrapper.find(".note-card__more").text()).toBe("+3 more")
     expect(wrapper.find(".note-card__progress").text()).toBe("0 of 9 done")
   })
+
+  describe("view switch", () => {
+    const toggle = (wrapper: ReturnType<typeof mountList>, label: string) =>
+      wrapper.findAll(".view-toggle__btn").find((button) => button.text() === label)!
+
+    const seedTwo = () => {
+      seedNote(store, "Groceries", [
+        { text: "Milk", completed: true },
+        { text: "Bread", completed: false }
+      ])
+      seedNote(store, "", [])
+    }
+
+    it("starts on cards", () => {
+      seedTwo()
+      const wrapper = mountList()
+
+      expect(wrapper.findAll(".note-card")).toHaveLength(2)
+      expect(wrapper.find(".note-row").exists()).toBe(false)
+      expect(toggle(wrapper, "Cards").attributes("aria-pressed")).toBe("true")
+      expect(toggle(wrapper, "List").attributes("aria-pressed")).toBe("false")
+    })
+
+    it("is hidden when there are no notes", () => {
+      const wrapper = mountList()
+
+      expect(wrapper.find(".view-toggle").exists()).toBe(false)
+    })
+
+    it("switches to a list showing only titles and progress", async () => {
+      seedTwo()
+      const wrapper = mountList()
+
+      await toggle(wrapper, "List").trigger("click")
+
+      const rows = wrapper.findAll(".note-row")
+      expect(rows).toHaveLength(2)
+      expect(wrapper.find(".note-card").exists()).toBe(false)
+      expect(toggle(wrapper, "List").attributes("aria-pressed")).toBe("true")
+
+      expect(rows[0].find(".note-row__title").text()).toBe("Groceries")
+      expect(rows[0].find(".note-row__count").text()).toBe("1 of 2 done")
+      expect(rows[0].find(".meter").exists()).toBe(true)
+      // No todo texts and no per-note buttons in this view.
+      expect(rows[0].text()).not.toContain("Milk")
+      expect(wrapper.text()).not.toContain("Delete note")
+
+      expect(rows[1].find(".note-row__title").text()).toBe("Untitled note")
+      expect(rows[1].find(".note-row__count").text()).toBe("No todos")
+      expect(rows[1].find(".meter").exists()).toBe(false)
+    })
+
+    it("opens a note when its row is clicked", async () => {
+      const id = seedNote(store, "Groceries", [])
+      const wrapper = mountList()
+      await toggle(wrapper, "List").trigger("click")
+
+      await wrapper.find(".note-row").trigger("click")
+
+      expect(push).toHaveBeenCalledWith(`/note/${id}`)
+    })
+
+    it("remembers the chosen view for the next visit", async () => {
+      seedTwo()
+      const first = mountList()
+      await toggle(first, "List").trigger("click")
+      await first.vm.$nextTick()
+      first.unmount()
+
+      const second = mountList()
+
+      expect(second.findAll(".note-row")).toHaveLength(2)
+    })
+
+    it("falls back to cards when the stored view is not one it knows", () => {
+      localStorage.setItem("todo-app:notes-view", "grid")
+      seedTwo()
+
+      expect(mountList().findAll(".note-card")).toHaveLength(2)
+    })
+  })
 })
