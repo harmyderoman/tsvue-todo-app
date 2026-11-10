@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type Todo from 'src/models/ToDoModel'
+import type Todo from '@/models/ToDoModel'
 
 const API_URL = 'http://localhost:3000/todos';
 

@@ -1,0 +1,880 @@
+/* ==========================================================================
+   Liquid glass theme
+   Translucent panes floating over a slow tide of colour. Depth comes from
+   blur, edge light and shadow instead of solid fills.
+   ========================================================================== */
+
+:root {
+  /* palette */
+  --ink: #071a24;
+  --ink-deep: #030d13;
+  --lagoon: #35e0c8;
+  --coral: #ff8f66;
+  --periwinkle: #7d8cff;
+  --rose: #ff6f8a;
+  --foam: #eef8f6;
+  --foam-dim: rgba(238, 248, 246, 0.66);
+  --foam-faint: rgba(238, 248, 246, 0.4);
+
+  /* glass */
+  --glass-fill: linear-gradient(
+    140deg,
+    rgba(255, 255, 255, 0.17),
+    rgba(255, 255, 255, 0.05) 55%,
+    rgba(255, 255, 255, 0.09)
+  );
+  --glass-edge: rgba(255, 255, 255, 0.24);
+  --glass-blur: blur(22px) saturate(175%);
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 28px rgba(255, 255, 255, 0.05),
+    0 24px 60px -22px rgba(0, 0, 0, 0.65);
+
+  /* type */
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+
+  /* shape + motion */
+  --r-sm: 14px;
+  --r-md: 22px;
+  --r-lg: 32px;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --glide: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--foam);
+  background: var(--ink-deep);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lagoon);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(53, 224, 200, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Backdrop: three slow drifting pools of colour for the glass to refract
+   -------------------------------------------------------------------------- */
+
+.tide {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #0d2d3c 0%, var(--ink) 45%, var(--ink-deep) 100%);
+}
+
+.tide__pool {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.6;
+  will-change: transform;
+}
+
+.tide__pool--lagoon {
+  width: 52vmax;
+  height: 52vmax;
+  left: -14vmax;
+  top: -18vmax;
+  background: radial-gradient(circle at 35% 35%, var(--lagoon), transparent 68%);
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+
+.tide__pool--coral {
+  width: 44vmax;
+  height: 44vmax;
+  right: -12vmax;
+  top: 22vh;
+  background: radial-gradient(circle at 60% 40%, var(--coral), transparent 66%);
+  animation: drift-b 32s ease-in-out infinite alternate;
+}
+
+.tide__pool--periwinkle {
+  width: 48vmax;
+  height: 48vmax;
+  left: 18vw;
+  bottom: -26vmax;
+  background: radial-gradient(circle at 50% 50%, var(--periwinkle), transparent 68%);
+  animation: drift-c 38s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  to {
+    transform: translate3d(16vw, 12vh, 0) scale(1.18) rotate(24deg);
+  }
+}
+
+@keyframes drift-b {
+  to {
+    transform: translate3d(-20vw, -14vh, 0) scale(0.86) rotate(-30deg);
+  }
+}
+
+@keyframes drift-c {
+  to {
+    transform: translate3d(12vw, -18vh, 0) scale(1.12) rotate(18deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Glass surface
+   -------------------------------------------------------------------------- */
+
+.glass {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-md);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* Specular highlight that follows the pointer (see glass.ts) */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 255, 255, 0.22),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.glass:hover::before {
+  opacity: 1;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: rgba(22, 56, 70, 0.92);
+  }
+}
+
+/* Recessed well cut into a glass pane */
+.well {
+  background: rgba(3, 13, 19, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--r-sm);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   Layout shell + navigation
+   -------------------------------------------------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 20px 80px;
+}
+
+.nav {
+  position: sticky;
+  top: 16px;
+  z-index: 20;
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto 44px;
+  padding: 6px;
+  border-radius: 999px;
+}
+
+.nav__list {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+
+.nav__link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 500;
+  color: var(--foam-dim);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.nav__link:hover,
+.nav__link.is-active {
+  color: var(--foam);
+}
+
+.nav__link.is-active {
+  cursor: default;
+}
+
+/* The droplet that slides between tabs */
+.nav__drop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--drop-w, 0px);
+  transform: translateX(var(--drop-x, 0px));
+  border-radius: 999px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(53, 224, 200, 0.22)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -6px 12px rgba(53, 224, 200, 0.18),
+    0 6px 20px -6px rgba(53, 224, 200, 0.55);
+  opacity: 0;
+  transition:
+    transform 0.6s var(--spring),
+    width 0.6s var(--spring),
+    opacity 0.3s ease;
+}
+
+.nav__drop.is-visible {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+
+.btn {
+  --btn-tint: rgba(255, 255, 255, 0.12);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), var(--btn-tint));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 8px 20px -10px rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--foam);
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  transition:
+    transform 0.35s var(--spring),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 14px 26px -12px rgba(0, 0, 0, 0.7);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+.btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 0.875rem;
+}
+
+.btn--accent {
+  --btn-tint: rgba(53, 224, 200, 0.34);
+  border-color: rgba(53, 224, 200, 0.55);
+}
+
+.btn--danger {
+  --btn-tint: rgba(255, 111, 138, 0.2);
+  color: #ffc2cd;
+}
+
+.btn--danger:hover:not(:disabled) {
+  border-color: rgba(255, 111, 138, 0.7);
+}
+
+/* --------------------------------------------------------------------------
+   Page header
+   -------------------------------------------------------------------------- */
+
+.page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.page-head h1 {
+  font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4rem);
+}
+
+.page-head__count {
+  color: var(--foam-dim);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Notes grid (List view)
+   -------------------------------------------------------------------------- */
+
+.notes {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  align-items: start;
+  gap: 22px;
+}
+
+.note-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  border-radius: var(--r-lg);
+  transition:
+    transform 0.5s var(--glide),
+    box-shadow 0.5s ease;
+}
+
+.note-card:hover {
+  transform: translateY(-5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 28px rgba(255, 255, 255, 0.07),
+    0 34px 70px -24px rgba(0, 0, 0, 0.75);
+}
+
+.note-card__title {
+  font-size: 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+.note-card__title.is-untitled {
+  color: var(--foam-faint);
+}
+
+.note-card__todos {
+  display: grid;
+  gap: 8px;
+}
+
+.note-card__todo {
+  position: relative;
+  padding-left: 22px;
+  color: var(--foam-dim);
+  overflow-wrap: anywhere;
+}
+
+.note-card__todo::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.45em;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--foam-faint);
+  border-radius: 50%;
+}
+
+.note-card__todo.completed::before {
+  border-color: var(--lagoon);
+  background: var(--lagoon);
+  box-shadow: 0 0 10px rgba(53, 224, 200, 0.7);
+}
+
+.note-card__progress {
+  display: grid;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--foam-dim);
+}
+
+.meter {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(3, 13, 19, 0.4);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.meter__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--periwinkle), var(--lagoon));
+  box-shadow: 0 0 12px rgba(53, 224, 200, 0.6);
+  transform-origin: left;
+  transform: scaleX(var(--done, 0));
+  transition: transform 0.8s var(--glide);
+}
+
+.note-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  max-width: 460px;
+  padding: 36px;
+  border-radius: var(--r-lg);
+}
+
+.empty h2 {
+  font-size: 1.75rem;
+}
+
+.empty p {
+  color: var(--foam-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Note editor
+   -------------------------------------------------------------------------- */
+
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 22px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px;
+  border-radius: var(--r-lg);
+}
+
+.editor__bar,
+.editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.editor__actions {
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.note-title {
+  margin: 0;
+  padding: 8px 12px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+h3.note-title {
+  cursor: text;
+  transition: background 0.3s ease;
+}
+
+h3.note-title:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.note-title.is-placeholder {
+  color: var(--foam-faint);
+}
+
+input.note-title,
+.todo__input {
+  background: rgba(3, 13, 19, 0.3);
+  border: 1px solid rgba(53, 224, 200, 0.55);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.35),
+    0 0 0 4px rgba(53, 224, 200, 0.14);
+  outline: none;
+}
+
+.todos {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 14px;
+}
+
+.todo__main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.todo__text {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  cursor: text;
+  overflow-wrap: anywhere;
+  text-decoration: line-through;
+  text-decoration-color: transparent;
+  transition:
+    color 0.4s ease,
+    text-decoration-color 0.4s ease;
+}
+
+.todo__text.is-placeholder {
+  color: var(--foam-faint);
+}
+
+.todo__text.completed {
+  color: var(--foam-faint);
+  text-decoration-color: currentColor;
+}
+
+.todo__input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.todo__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+/* Checkbox: an empty glass bead that fills with liquid when ticked */
+.check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  /* layers, top to bottom: tick, liquid fill, empty glass */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23071a24' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-8'/%3E%3C/svg%3E")
+      center / 0 no-repeat,
+    radial-gradient(circle, var(--lagoon) 60%, transparent 62%) center / 0 0 no-repeat,
+    rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition:
+    background-size 0.45s var(--glide),
+    box-shadow 0.45s ease,
+    border-color 0.3s ease,
+    transform 0.35s var(--spring);
+}
+
+.check:hover {
+  transform: scale(1.1);
+  border-color: var(--lagoon);
+}
+
+.check:checked {
+  border-color: var(--lagoon);
+  background-size: 100%, 180% 180%, auto;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 16px rgba(53, 224, 200, 0.6);
+  animation: bead-pop 0.5s var(--spring);
+}
+
+@keyframes bead-pop {
+  40% {
+    transform: scale(1.28);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Modal
+   -------------------------------------------------------------------------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 13, 19, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.modal__dialog {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 440px);
+  padding: 26px;
+  border-radius: var(--r-lg);
+}
+
+.modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modal__title {
+  font-size: 1.4rem;
+}
+
+.modal__close {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    transform 0.4s var(--spring);
+}
+
+.modal__close:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: rotate(90deg);
+}
+
+.modal__body {
+  color: var(--foam-dim);
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Transitions
+   -------------------------------------------------------------------------- */
+
+/* Route change: the outgoing view melts, the incoming one condenses */
+.melt-enter-active {
+  transition:
+    opacity 0.5s var(--glide),
+    transform 0.5s var(--glide),
+    filter 0.5s var(--glide);
+}
+
+.melt-leave-active {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    filter 0.22s ease;
+}
+
+.melt-enter-from {
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  filter: blur(12px);
+}
+
+.melt-leave-to {
+  opacity: 0;
+  transform: scale(0.985);
+  filter: blur(8px);
+}
+
+/* List items (note cards, todos): rise in, dissolve out, glide to reflow */
+.rise-enter-active {
+  transition:
+    opacity 0.55s var(--glide),
+    transform 0.65s var(--spring),
+    filter 0.55s var(--glide);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+.rise-leave-active {
+  position: absolute;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    filter 0.35s ease;
+  pointer-events: none;
+}
+
+.rise-move {
+  transition: transform 0.55s var(--glide);
+}
+
+.rise-enter-from {
+  opacity: 0;
+  transform: translateY(22px) scale(0.94);
+  filter: blur(10px);
+}
+
+.rise-leave-to {
+  opacity: 0;
+  transform: scale(0.88);
+  filter: blur(14px);
+}
+
+/* Modal: backdrop fades, dialog springs up */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-active .modal__dialog {
+  transition: transform 0.5s var(--spring);
+}
+
+.modal-leave-active .modal__dialog {
+  transition: transform 0.25s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal__dialog {
+  transform: translateY(24px) scale(0.9);
+}
+
+.modal-leave-to .modal__dialog {
+  transform: scale(0.96);
+}
+
+/* --------------------------------------------------------------------------
+   Small screens + reduced motion
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .shell {
+    padding: 14px 14px 60px;
+  }
+
+  .nav {
+    margin-bottom: 32px;
+  }
+
+  .nav__link {
+    padding: 9px 16px;
+  }
+
+  .editor {
+    padding: 18px;
+  }
+
+  .todo {
+    flex-wrap: wrap;
+  }
+
+  .todo__main {
+    flex-basis: 100%;
+  }
+
+  .todo__actions {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

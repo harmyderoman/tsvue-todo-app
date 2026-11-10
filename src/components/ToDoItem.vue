@@ -1,52 +1,58 @@
 <template>
-  <li
-    ref="todoItem"
-    class="card bg-primary border-light mt-3 p-2 pr-3 shadow-inset"
-  >
-    <div
-      class="d-flex flex-row align-items-center w-100 justify-content-between"
-    >
-      <div class="d-flex flex-row align-items-center pl-2 pr-2 w-100">
-        <input v-model="checked" type="checkbox" />
+  <li ref="todoItem" class="todo well">
+    <div class="todo__main">
+      <input
+        v-model="checked"
+        class="check"
+        type="checkbox"
+        aria-label="Mark as done"
+      />
 
-        <span
-          :class="{ completed: todo.completed && todo.text }"
-          v-if="!editable"
-          @click="editable = !editable"
-        >
-          {{ todo.text ? todo.text : "Click to edit Todo" }}
-        </span>
-        <input
-          class="form-control todo-text-input"
-          v-else
-          type="text"
-          :value="todo.text"
-          @input="onTextChange"
-          @keyup.enter="editable = !editable"
-        />
-      </div>
+      <span
+        v-if="!editable"
+        class="todo__text"
+        :class="{
+          completed: todo.completed && todo.text,
+          'is-placeholder': !todo.text
+        }"
+        @click="editable = true"
+      >
+        {{ todo.text ? todo.text : "Click to edit Todo" }}
+      </span>
+      <input
+        v-else
+        ref="textInput"
+        class="todo__input"
+        type="text"
+        aria-label="Todo text"
+        :value="todo.text"
+        @input="onTextChange"
+        @keyup.enter="editable = false"
+      />
+    </div>
 
-      <div class="d-flex flex-row align-items-center pl-2 pr-2">
-        <button
-          class="btn btn-sm btn-primary"
-          @click="editable = !editable"
-          :class="{ 'text-info': editable }"
-        >
-          {{ editable ? "Save" : "Edit" }}
-        </button>
-        <button
-          class="btn btn-sm btn-primary text-danger ml-2"
-          @click="$emit('remove-todo', todo)"
-        >
-          Delete
-        </button>
-      </div>
+    <div class="todo__actions">
+      <button
+        type="button"
+        class="btn btn--sm"
+        :class="{ 'btn--accent': editable }"
+        @click="editable = !editable"
+      >
+        {{ editable ? "Save" : "Edit" }}
+      </button>
+      <button
+        type="button"
+        class="btn btn--sm btn--danger"
+        @click="$emit('remove-todo', todo)"
+      >
+        Delete
+      </button>
     </div>
   </li>
 </template>
 
 <script lang="ts">
-  import { defineComponent, PropType, ref } from "vue"
+  import { defineComponent, nextTick, PropType, ref, watch } from "vue"
   import ToDo from "@/models/ToDoModel"
   import { onClickOutside } from "@vueuse/core"
 
@@ -58,8 +64,10 @@
         required: true
       }
     },
+    emits: ["remove-todo", "update-todo", "checkbox-click"],
     setup() {
-      const todoItem = ref(null)
+      const todoItem = ref<HTMLElement | null>(null)
+      const textInput = ref<HTMLInputElement | null>(null)
       const editable = ref(false)
 
       onClickOutside(todoItem, () => {
@@ -68,11 +76,17 @@
         }
       })
 
-      return { todoItem, editable }
+      watch(editable, async (isEditable) => {
+        if (!isEditable) return
+        await nextTick()
+        textInput.value?.focus()
+      })
+
+      return { todoItem, textInput, editable }
     },
     methods: {
-      onTextChange(e: { target: { value: string } }) {
-        this.$emit("update-todo", e.target.value)
+      onTextChange(e: Event) {
+        this.$emit("update-todo", (e.target as HTMLInputElement).value)
       }
     },
     computed: {
@@ -87,48 +101,3 @@
     }
   })
 </script>
-
-<style>
-  span {
-    word-wrap: none;
-    padding-left: 10px;
-  }
-  .completed {
-    text-decoration: line-through;
-  }
-  input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-  }
-  .todo-text-input {
-    height: 32px !important;
-    border: none !important;
-    border-radius: 5px !important;
-  }
-  .todo-body {
-    display: flex;
-    align-items: center;
-    padding-left: 15px;
-  }
-  .todo-actions {
-    flex-grow: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  @media screen and (max-width: 768px) {
-    li {
-      padding-right: 0;
-    }
-    .todo-text-input {
-      max-width: 300px;
-    }
-    input[type="checkbox"] {
-      margin-right: 5px;
-    }
-    .todo-body {
-      padding-left: 5px;
-    }
-  }
-</style>

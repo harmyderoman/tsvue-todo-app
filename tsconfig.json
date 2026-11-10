@@ -2,39 +2,38 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "preserve",
-    "importHelpers": true,
-    "moduleResolution": "node",
+    "noEmit": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": ".",
+    "resolveJsonModule": true,
     "types": [
-      "webpack-env",
-      "jest"
+      "vite/client"
     ],
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
+      ],
+      "vuex": [
+        "./node_modules/vuex/types/index.d.ts"
       ]
     },
     "lib": [
       "esnext",
       "dom",
-      "dom.iterable",
-      "scripthost"
+      "dom.iterable"
     ]
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.tsx",
     "src/**/*.vue",
-    "test/**/*.ts",
-    "test/**/*.tsx"
+    "tests/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

@@ -1,30 +1,32 @@
 <template>
   <teleport to="body">
-    <transition name="fade">
-      <div v-if="showModal" class="modal-backdrop" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content shadow-soft">
-            <div class="modal-header">
-              <h2 class="h6 modal-title mb-0">
-                <slot name="modal-header"> default Title</slot>
-              </h2>
-
-              <button type="button" class="close" @click="$emit('onClose')">
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p>
-                <slot name="modal-body">
-                  default text
-                </slot>
-              </p>
-            </div>
-            <div class="modal-footer">
-              <slot name="modal-actions">
-                <p>No Actions</p>
-              </slot>
-            </div>
+    <transition name="modal">
+      <div
+        v-if="show"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        @click.self="$emit('onClose')"
+      >
+        <div class="modal__dialog glass">
+          <div class="modal__head">
+            <h2 class="modal__title">
+              <slot name="modal-header">Are you sure?</slot>
+            </h2>
+            <button
+              type="button"
+              class="modal__close"
+              aria-label="Close"
+              @click="$emit('onClose')"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <p class="modal__body">
+            <slot name="modal-body"></slot>
+          </p>
+          <div class="modal__actions">
+            <slot name="modal-actions"></slot>
           </div>
         </div>
       </div>
@@ -33,51 +35,22 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, watch } from "vue"
+  import { defineComponent } from "vue"
+  import { useEventListener } from "@vueuse/core"
 
-  const props = {
-    show: {
-      type: Boolean,
-      default: false
-    }
-  }
-  const emits = ["onClose"]
-  const components = {}
   export default defineComponent({
     name: "ModalDialog",
-    props,
-    emits,
-    components,
-    setup(props) {
-      const showModal = ref(false)
-
-      watch(
-        () => props.show,
-        (show) => {
-          showModal.value = show
-        }
-      )
-
-      return {
-        showModal
+    props: {
+      show: {
+        type: Boolean,
+        default: false
       }
+    },
+    emits: ["onClose"],
+    setup(props, { emit }) {
+      useEventListener(document, "keydown", (event: KeyboardEvent) => {
+        if (props.show && event.key === "Escape") emit("onClose")
+      })
     }
   })
 </script>
-
-<style>
-  .modal-backdrop {
-    overflow: hidden;
-    outline: 0;
-    background-color: #e6e7eec0 !important;
-  }
-  .fade-enter-active,
-  .fade-leave-active {
-    transition: opacity 0.5s ease;
-  }
-
-  .fade-enter-from,
-  .fade-leave-to {
-    opacity: 0;
-  }
-</style>
