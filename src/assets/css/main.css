@@ -147,7 +147,7 @@ input {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: linear-gradient(145deg, #103235, #092327 50%, #05171d);
+  background: linear-gradient(145deg, #123b39, #0a2c2b 50%, #051e1e);
 }
 
 .tide__texture {
@@ -1174,7 +1174,7 @@ input.note-title,
 }
 
 [data-theme='light'] .tide {
-  background: linear-gradient(145deg, #bce2d8, #d4e9e2 50%, #e7f1e9);
+  background: linear-gradient(145deg, #8ecfca, #b0dfd9 50%, #d4eeea);
 }
 
 [data-theme='light'] .tide__texture {
