@@ -1171,7 +1171,7 @@ input.note-title,
   padding: 10px;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform .75s cubic-bezier(.22, 1, .36, 1);
+  transform-origin: right center;
 }
 
 .theme-toggle svg {
@@ -1334,6 +1334,16 @@ input.note-title,
     height: 44px;
   }
 }
+
+/* Reveal the new theme above the unchanged snapshot of the previous one. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
 
 @media (prefers-reduced-motion: reduce) {
   *,
