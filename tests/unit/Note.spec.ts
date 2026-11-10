@@ -258,6 +258,28 @@ describe("Note editor", () => {
       expect(buttonByText("Share").attributes("disabled")).toBeDefined()
     })
 
+    it("enables Save only while there are changes to save", async () => {
+      const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+      await openApp(`/note/${id}`)
+      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+
+      store.updateTodo(0, { completed: true })
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
+
+      await buttonByText("Save").trigger("click")
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+
+      // Undoing the edit back to the saved state leaves nothing to save.
+      store.updateTodo(0, { completed: false })
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
+      store.updateTodo(0, { completed: true })
+      await flushPromises()
+      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+    })
+
     it("offers Delete only for a note that has been saved", async () => {
       const deleteNote = () => wrapper.find(".editor__actions .btn--danger")
       await openApp("/note")

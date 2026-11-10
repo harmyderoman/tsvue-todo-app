@@ -5,8 +5,8 @@
   <button
     class="btn btn--accent"
     type="button"
-    :disabled="store.isEmptyNote"
-    :title="store.isEmptyNote ? 'Add a title or a todo first' : undefined"
+    :disabled="!canSave"
+    :title="saveHint"
     @click="saveNote"
   >
     Save
@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onBeforeUnmount, ref } from "vue"
+  import { computed, defineComponent, onBeforeUnmount, ref } from "vue"
   import { useNotesStore } from "@/store"
   import router from "@/router"
   import ModalWindow from "./ModalWindow.vue"
@@ -62,7 +62,17 @@
       let savedTimer: ReturnType<typeof setTimeout> | undefined
       onBeforeUnmount(() => clearTimeout(savedTimer))
 
+      // Save is live only when it would write something: the note has content
+      // and differs from what is already stored.
+      const canSave = computed(() => !store.isEmptyNote && store.hasUnsavedChanges)
+      const saveHint = computed(() => {
+        if (store.isEmptyNote) return "Add a title or a todo first"
+        if (!store.hasUnsavedChanges) return "No changes to save"
+        return undefined
+      })
+
       const saveNote = () => {
+        if (!canSave.value) return
         store.saveNote()
         justSaved.value = true
         clearTimeout(savedTimer)
@@ -81,6 +91,8 @@
       }
       return {
         store,
+        canSave,
+        saveHint,
         saveNote,
         backToNotes,
         deleteNote,
