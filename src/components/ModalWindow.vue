@@ -17,11 +17,12 @@
             </h2>
             <button
               type="button"
-              class="modal__close"
+              class="btn btn--icon btn--sm btn--quiet modal__close"
               aria-label="Close"
+              data-tip="Close (Esc)"
               @click="$emit('onClose')"
             >
-              <span aria-hidden="true">×</span>
+              <glass-icon name="close" />
             </button>
           </div>
           <p class="modal__body">
@@ -39,11 +40,13 @@
 <script lang="ts">
   import { defineComponent, onBeforeUnmount, ref, useId, watch } from "vue"
   import { useEventListener } from "@vueuse/core"
+  import GlassIcon from "./GlassIcon.vue"
 
   const FOCUSABLE = "button:not(:disabled), [href], input:not(:disabled), [tabindex]:not([tabindex='-1'])"
 
   export default defineComponent({
     name: "ModalDialog",
+    components: { GlassIcon },
     props: {
       show: {
         type: Boolean,

@@ -286,6 +286,21 @@ input {
   gap: 2px;
 }
 
+/* The capsule under the Notes / New note and Cards / List switches is clear
+   glass: only its rim and a faint sheen show, and the droplet marking the
+   choice does the talking. */
+.liquid-toggle {
+  --glass-fill: linear-gradient(140deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01) 55%, rgba(255, 255, 255, 0.035));
+  --glass-blur: blur(3px) saturate(140%);
+  --glass-sheen: 0.25;
+  --glass-hover-sheen: 0.45;
+}
+
+[data-theme='light'] .liquid-toggle {
+  --glass-fill: linear-gradient(140deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 55%, rgba(255, 255, 255, 0.06));
+  --glass-sheen: 0.15;
+}
+
 .liquid-toggle__track {
   position: relative;
   display: flex;
@@ -1508,25 +1523,10 @@ input.note-title,
   font-size: 1.4rem;
 }
 
+/* The same glass cross as the note editor's (an icon button), tucked into
+   the corner. */
 .modal__close {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    background 0.3s ease,
-    transform 0.4s var(--spring);
-}
-
-.modal__close:hover {
-  background: rgba(255, 255, 255, 0.22);
-  transform: rotate(90deg);
+  margin: -4px -6px 0 0;
 }
 
 .modal__body {
@@ -1987,7 +1987,7 @@ input.note-title,
   --periwinkle: #596bc7;
   --card-fill: linear-gradient(145deg, rgba(255,255,255,.07), rgba(237,249,246,.02) 55%, rgba(255,255,255,.05));
   --glass-fill:
-    radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.6), transparent 58%),
+    radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.6), transparent 80%),
     linear-gradient(145deg, rgba(255,255,255,.36), rgba(221,237,241,.14) 52%, rgba(255,255,255,.32));
   --glass-rim: linear-gradient(145deg, #fff, rgba(255,255,255,.85) 24%, rgba(66,108,123,.3) 65%, #fff);
   --glass-inset:
@@ -2047,15 +2047,13 @@ input.note-title,
   box-shadow: var(--glass-inset), 0 4px 7px rgba(35,76,92,.15), 0 30px 45px -18px rgba(35,76,92,.32);
 }
 /* Buttons bring their own colour (see .btn); the other beads are lagoon. */
-[data-theme='light'] .liquid-toggle__drop,
-[data-theme='light'] .modal__close {
+[data-theme='light'] .liquid-toggle__drop {
   --bubble-top: 102,224,202;
   --bubble-bottom: 18,164,146;
   --bubble-shadow: 8,124,112;
 }
 [data-theme='light'] .liquid-toggle__drop,
-[data-theme='light'] .btn,
-[data-theme='light'] .modal__close {
+[data-theme='light'] .btn {
   --bubble-fill:
     radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.8), transparent 62%),
     linear-gradient(160deg, rgba(var(--bubble-top),.48), rgba(var(--bubble-bottom),.34));
@@ -2110,10 +2108,6 @@ input.note-title,
     height: 34px;
   }
 
-  .modal__close {
-    width: 44px;
-    height: 44px;
-  }
 }
 
 /* Reveal the new theme above the unchanged snapshot of the previous one. */
