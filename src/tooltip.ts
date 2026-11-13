@@ -33,9 +33,11 @@ export function installGlassTooltips(doc: Document = document): () => void {
     if (!text || !el.isConnected) return
     anchor = el
     tip.textContent = text
-    // Measured with the text in place; the bubble keeps its layout while hidden.
+    // Measured with the text in place; the bubble keeps its layout while
+    // hidden. offset* rather than the bounding box, which would report the
+    // bubble shrunk by its entrance animation.
     const a = el.getBoundingClientRect()
-    const t = tip.getBoundingClientRect()
+    const t = { width: tip.offsetWidth, height: tip.offsetHeight }
     const below = a.top - t.height - GAP < EDGE
     const centre = a.left + a.width / 2
     const left = Math.min(Math.max(centre - t.width / 2, EDGE), win.innerWidth - t.width - EDGE)
