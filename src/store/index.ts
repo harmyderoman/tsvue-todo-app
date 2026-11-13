@@ -134,16 +134,19 @@ export const useNotesStore = defineStore('notes', () => {
 
   // Saved notes
 
-  /** Writes the draft to the saved notes, dropping todos without text. */
+  /**
+   * Writes the draft to the saved notes, leaving out todos without text. The
+   * draft itself keeps them: with autosave, a blank row is usually the one
+   * being typed into.
+   */
   function saveNote(): void {
     const draft = currentNote.value
-    draft.todos = draft.todos.filter(todo => todo.text !== '')
     // The saved note gets its own copy of the todos. Sharing the array with
-    // the draft would let later unsaved edits leak into the saved note.
+    // the draft would let later edits leak into the saved note.
     const saved: Note = {
       id: currentId.value,
       title: draft.title,
-      todos: copyTodos(draft.todos)
+      todos: copyTodos(draft.todos.filter(todo => todo.text !== ''))
     }
     const index = notes.value.findIndex(note => note.id === saved.id)
     if (index === -1) {

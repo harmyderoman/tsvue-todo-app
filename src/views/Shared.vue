@@ -6,8 +6,11 @@
       <ul class="todos">
         <li v-for="(todo, index) in note.todos" :key="index" class="todo well">
           <div class="todo__main">
-            <input class="check" type="checkbox" :checked="todo.completed"
-              aria-label="Mark as done in a local copy" @change="edit(index)" />
+            <span class="check-bead">
+              <input class="check" type="checkbox" :checked="todo.completed"
+                aria-label="Mark as done in a local copy" @change="edit(index)" />
+              <glass-icon name="check" />
+            </span>
             <button class="todo__text" :class="{ completed: todo.completed }" type="button" @click="edit()">
               {{ todo.text || 'Empty todo' }}
             </button>
@@ -30,6 +33,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useNotesStore } from '@/store'
 import { decodeNote } from '@/sharing'
+import GlassIcon from '@/components/GlassIcon.vue'
 
 const route = useRoute()
 const router = useRouter()

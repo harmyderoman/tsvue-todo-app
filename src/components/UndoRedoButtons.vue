@@ -1,32 +1,36 @@
 <template>
   <button
-    class="btn btn--sm btn--quiet"
+    class="btn btn--icon btn--sm btn--quiet"
     type="button"
+    aria-label="Undo"
     title="Undo (Ctrl+Z)"
     aria-keyshortcuts="Control+Z"
     :disabled="!store.canUndo"
     @click="store.undo()"
   >
-    <span aria-hidden="true">↶</span> Undo
+    <glass-icon name="undo" />
   </button>
   <button
-    class="btn btn--sm btn--quiet"
+    class="btn btn--icon btn--sm btn--quiet"
     type="button"
+    aria-label="Redo"
     title="Redo (Ctrl+Shift+Z)"
     aria-keyshortcuts="Control+Shift+Z"
     :disabled="!store.canRedo"
     @click="store.redo()"
   >
-    <span aria-hidden="true">↷</span> Redo
+    <glass-icon name="redo" />
   </button>
 </template>
 
 <script lang="ts">
   import { defineComponent } from "vue"
   import { useNotesStore } from "@/store"
+  import GlassIcon from "./GlassIcon.vue"
 
   export default defineComponent({
     name: "UndoRedoButtons",
+    components: { GlassIcon },
     setup() {
       return { store: useNotesStore() }
     }

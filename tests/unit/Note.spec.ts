@@ -23,6 +23,8 @@ const openApp = async (path: string) => {
 const buttonByText = (text: string) =>
   wrapper.findAll("button").find((button) => button.text() === text)!
 
+const buttonByLabel = (label: string) => wrapper.find(`button[aria-label="${label}"]`)
+
 const currentPath = () => router.currentRoute.value.path
 
 describe("Note editor", () => {
@@ -31,7 +33,6 @@ describe("Note editor", () => {
   })
 
   afterEach(async () => {
-    // Unmounting removes the unsaved-changes guard, so this always succeeds.
     wrapper.unmount()
     await router.push("/")
   })
@@ -218,7 +219,7 @@ describe("Note editor", () => {
 
     it("does nothing while a dialog is open", async () => {
       await openEditedNote()
-      await buttonByText("Back to notes").trigger("click")
+      await buttonByLabel("Delete note").trigger("click")
       await flushPromises()
       expect(wrapper.find(".modal").exists()).toBe(true)
 
@@ -229,112 +230,139 @@ describe("Note editor", () => {
     })
   })
 
-  describe("saving", () => {
-    it("saves in place and confirms with a status message", async () => {
+  describe("autosave", () => {
+    it("stores a new note as soon as it has content, and says so", async () => {
       await openApp("/note")
-      store.updateTitle("Groceries")
-      await flushPromises() // Save is disabled until the title has rendered
+      expect(store.notes).toHaveLength(0)
 
-      await buttonByText("Save").trigger("click")
+      store.updateTitle("Groceries")
+      await flushPromises()
 
       expect(currentPath()).toBe("/note")
-      expect(wrapper.find("[role='status']").text()).toBe("Saved")
+      expect(wrapper.find(".saved-flag").text()).toBe("Saved")
       expect(store.notes.map((note) => note.title)).toEqual(["Groceries"])
     })
 
-    it("keeps Save and Share disabled while the note is empty", async () => {
+    it("does not store a new note that stays empty", async () => {
       await openApp("/note")
-      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
-      expect(buttonByText("Share").attributes("disabled")).toBeDefined()
-
-      store.updateTitle("Groceries")
+      await buttonByText("+ Add todo").trigger("click")
       await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
-      expect(buttonByText("Share").attributes("disabled")).toBeUndefined()
 
-      store.updateTitle("")
+      await buttonByLabel("Close note").trigger("click")
       await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
-      expect(buttonByText("Share").attributes("disabled")).toBeDefined()
+
+      expect(currentPath()).toBe("/")
+      expect(store.notes).toHaveLength(0)
     })
 
-    it("enables Save only while there are changes to save", async () => {
+    it("writes every edit to the saved note, undo included", async () => {
       const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
       await openApp(`/note/${id}`)
-      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
 
       store.updateTodo(0, { completed: true })
       await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
+      expect(store.notes[0].todos[0].completed).toBe(true)
 
-      await buttonByText("Save").trigger("click")
+      store.undo()
       await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
-
-      // Undoing the edit back to the saved state leaves nothing to save.
-      store.updateTodo(0, { completed: false })
-      await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeUndefined()
-      store.updateTodo(0, { completed: true })
-      await flushPromises()
-      expect(buttonByText("Save").attributes("disabled")).toBeDefined()
+      expect(store.notes[0].todos[0].completed).toBe(false)
     })
 
-    it("offers Delete only for a note that has been saved", async () => {
-      const deleteNote = () => wrapper.find(".editor__actions .btn--danger")
+    it("keeps a blank row in the editor while leaving it out of the saved note", async () => {
+      const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+      await openApp(`/note/${id}`)
+
+      await buttonByText("+ Add todo").trigger("click")
+      await wrapper.find(".todo__input").setValue("Br")
+      await flushPromises()
+
+      expect(store.notes[0].todos.map((todo) => todo.text)).toEqual(["Milk", "Br"])
+      expect(document.activeElement).toBe(wrapper.find(".todo__input").element)
+    })
+
+    it("keeps Share disabled while the note is empty", async () => {
       await openApp("/note")
-      expect(deleteNote().exists()).toBe(false)
+      expect(buttonByLabel("Share note").attributes("disabled")).toBeDefined()
 
       store.updateTitle("Groceries")
       await flushPromises()
-      await buttonByText("Save").trigger("click")
+      expect(buttonByLabel("Share note").attributes("disabled")).toBeUndefined()
+    })
 
-      expect(deleteNote().exists()).toBe(true)
+    it("offers Delete once the note has been stored", async () => {
+      await openApp("/note")
+      expect(buttonByLabel("Delete note").exists()).toBe(false)
+
+      store.updateTitle("Groceries")
+      await flushPromises()
+
+      expect(buttonByLabel("Delete note").exists()).toBe(true)
     })
   })
 
-  describe("leaving", () => {
-    it("leaves straight away when nothing changed", async () => {
+  describe("closing", () => {
+    it("goes back to the list with the cross, keeping the changes", async () => {
       const id = seedNote(store, "Groceries", [])
       await openApp(`/note/${id}`)
+      store.updateTitle("Changed")
+      await flushPromises()
 
-      await buttonByText("Back to notes").trigger("click")
+      await buttonByLabel("Close note").trigger("click")
       await flushPromises()
 
       expect(currentPath()).toBe("/")
+      expect(store.notes[0].title).toBe("Changed")
+      expect(store.currentNote).toEqual({ title: "", todos: [] })
     })
 
-    it("asks before discarding unsaved changes, and stays on Keep editing", async () => {
+    it("keeps a change made right before leaving", async () => {
       const id = seedNote(store, "Groceries", [])
       await openApp(`/note/${id}`)
+
+      // No flush between the edit and the navigation.
       store.updateTitle("Changed")
-
-      await buttonByText("Back to notes").trigger("click")
-      await flushPromises()
-
-      expect(currentPath()).toBe(`/note/${id}`)
-      expect(wrapper.find(".modal__title").text()).toBe("Leave without saving?")
-
-      await buttonByText("Keep editing").trigger("click")
-      expect(wrapper.find(".modal").exists()).toBe(false)
-      expect(store.currentNote.title).toBe("Changed")
-    })
-
-    it("also guards the navigation tabs, and discards the changes on Leave", async () => {
-      const id = seedNote(store, "Groceries", [])
-      await openApp(`/note/${id}`)
-      store.updateTitle("Changed")
-
       await wrapper.find(".nav__link").trigger("click")
       await flushPromises()
-      expect(currentPath()).toBe(`/note/${id}`)
-
-      await buttonByText("Leave").trigger("click")
-      await flushPromises()
 
       expect(currentPath()).toBe("/")
-      expect(store.notes[0].title).toBe("Groceries")
-      expect(store.currentNote).toEqual({ title: "", todos: [] })
+      expect(store.notes[0].title).toBe("Changed")
+    })
+
+    it("closes on Escape, but not while a dialog or a text field has it", async () => {
+      const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+      await openApp(`/note/${id}`)
+      const escape = (target: EventTarget) =>
+        target.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))
+
+      // In the title field: Escape closes the field and stays in the note.
+      await wrapper.find("h1 button").trigger("click")
+      await wrapper.find("input.note-title").trigger("keydown", { key: "Escape" })
+      await flushPromises()
+      expect(wrapper.find("input.note-title").exists()).toBe(false)
+      expect(currentPath()).toBe(`/note/${id}`)
+
+      // With the delete dialog open, Escape belongs to the dialog.
+      await buttonByLabel("Delete note").trigger("click")
+      escape(document.body)
+      await flushPromises()
+      expect(wrapper.find(".modal").exists()).toBe(false)
+      expect(currentPath()).toBe(`/note/${id}`)
+
+      escape(document.body)
+      await flushPromises()
+      expect(currentPath()).toBe("/")
+    })
+
+    it("removes a note that was emptied out", async () => {
+      const id = seedNote(store, "Groceries", [])
+      await openApp(`/note/${id}`)
+      store.updateTitle("")
+      await flushPromises()
+
+      await buttonByLabel("Close note").trigger("click")
+      await flushPromises()
+
+      expect(store.notes).toHaveLength(0)
     })
   })
 
@@ -343,8 +371,7 @@ describe("Note editor", () => {
       const id = seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
       await openApp(`/note/${id}`)
 
-      // Scoped to the note's actions: every todo row has a Delete of its own.
-      await wrapper.find(".editor__actions .btn--danger").trigger("click")
+      await buttonByLabel("Delete note").trigger("click")
       expect(wrapper.find(".modal__title").text()).toBe("Delete this note?")
 
       await wrapper.find(".modal .btn--danger").trigger("click")

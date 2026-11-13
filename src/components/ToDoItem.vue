@@ -1,12 +1,15 @@
 <template>
   <li ref="todoItem" class="todo well">
     <div class="todo__main">
-      <input
-        v-model="checked"
-        class="check"
-        type="checkbox"
-        aria-label="Mark as done"
-      />
+      <span class="check-bead">
+        <input
+          v-model="checked"
+          class="check"
+          type="checkbox"
+          aria-label="Mark as done"
+        />
+        <glass-icon name="check" />
+      </span>
 
       <button
         v-if="!editable"
@@ -21,7 +24,8 @@
       >
         {{ todo.text ? todo.text : "Click to edit Todo" }}
       </button>
-      <!-- keydown, not keyup: the Enter that opened the field must not close it -->
+      <!-- keydown, not keyup: the Enter that opened the field must not close it.
+           Escape only closes the field; .stop keeps it from closing the note too. -->
       <input
         v-else
         ref="textInput"
@@ -31,24 +35,29 @@
         :value="todo.text"
         @input="onTextChange"
         @keydown.enter="finishWithKeyboard"
+        @keydown.esc.stop="stopEditing"
       />
     </div>
 
     <div class="todo__actions">
       <button
         type="button"
-        class="btn btn--sm"
+        class="btn btn--icon btn--sm"
         :class="editable ? 'btn--accent' : 'btn--quiet'"
+        :aria-label="editable ? 'Save todo' : 'Edit todo'"
+        :title="editable ? 'Save todo' : 'Edit todo'"
         @click="editable = !editable"
       >
-        {{ editable ? "Save" : "Edit" }}
+        <glass-icon :name="editable ? 'save' : 'pencil'" />
       </button>
       <button
         type="button"
-        class="btn btn--sm btn--quiet btn--danger"
+        class="btn btn--icon btn--sm btn--quiet btn--danger"
+        aria-label="Delete todo"
+        title="Delete todo"
         @click="$emit('remove-todo', todo)"
       >
-        Delete
+        <glass-icon name="trash" />
       </button>
     </div>
   </li>
@@ -58,9 +67,11 @@
   import { defineComponent, nextTick, onMounted, PropType, ref, watch } from "vue"
   import ToDo from "@/models/ToDoModel"
   import { onClickOutside } from "@vueuse/core"
+  import GlassIcon from "./GlassIcon.vue"
 
   export default defineComponent({
     name: "TodoItem",
+    components: { GlassIcon },
     props: {
       todo: {
         type: Object as PropType<ToDo>,
@@ -105,7 +116,14 @@
         if (props.todo.text !== "") emit("add-next")
       }
 
-      return { todoItem, textInput, displayRef, editable, finishWithKeyboard }
+      // Escape: close the field and stay on the row, without starting a new one.
+      const stopEditing = async () => {
+        editable.value = false
+        await nextTick()
+        displayRef.value?.focus()
+      }
+
+      return { todoItem, textInput, displayRef, editable, finishWithKeyboard, stopEditing }
     },
     methods: {
       onTextChange(e: Event) {

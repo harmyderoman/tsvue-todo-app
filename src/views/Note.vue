@@ -2,6 +2,19 @@
   <main class="editor glass">
     <div class="editor__bar">
       <undo-redo-buttons />
+      <span class="saved-flag" :class="{ 'is-visible': justSaved }" role="status">
+        <template v-if="justSaved"><glass-icon name="save" /> Saved</template>
+      </span>
+      <button
+        class="btn btn--icon btn--quiet editor__close"
+        type="button"
+        aria-label="Close note"
+        title="Close note (Esc)"
+        aria-keyshortcuts="Escape"
+        @click="closeEditor"
+      >
+        <glass-icon name="close" />
+      </button>
     </div>
 
     <note-title :title="note.title" @update-title="updateTitle" />
@@ -24,7 +37,7 @@
       />
     </transition-group>
 
-    <div>
+    <div class="editor__footer">
       <button
         class="btn"
         type="button"
@@ -34,35 +47,19 @@
       >
         <span aria-hidden="true">+</span> Add todo
       </button>
+      <div class="editor__actions">
+        <note-actions />
+      </div>
     </div>
-
-    <div class="editor__actions">
-      <note-actions />
-    </div>
-
-    <modal-window :show="pendingPath !== null" @onClose="keepEditing">
-      <template v-slot:modal-header>Leave without saving?</template>
-      <template v-slot:modal-body>
-        Your changes to this note will be lost.
-      </template>
-      <template v-slot:modal-actions>
-        <button type="button" class="btn btn--danger" @click="leave">
-          Leave
-        </button>
-        <button type="button" class="btn btn--quiet" @click="keepEditing">
-          Keep editing
-        </button>
-      </template>
-    </modal-window>
   </main>
 </template>
 
 <script lang="ts">
-  import { defineComponent, computed, onMounted, ref, nextTick } from "vue"
+  import { defineComponent, computed, onBeforeUnmount, onMounted, ref, nextTick, watch } from "vue"
   import TodoItem from "@/components/ToDoItem.vue"
 
   import NoteActions from "@/components/NoteActions.vue"
-  import ModalWindow from "@/components/ModalWindow.vue"
+  import GlassIcon from "@/components/GlassIcon.vue"
   import { useNotesStore } from "@/store"
   import router from "@/router"
   import { onBeforeRouteLeave } from "vue-router"
@@ -71,12 +68,14 @@
   import UndoRedoButtons from "@/components/UndoRedoButtons.vue"
   import NoteTitle from "@/components/NoteTitle.vue"
 
+  const SAVED_FLAG_MS = 1600
+
   export default defineComponent({
     name: "Note",
     components: {
       TodoItem,
       NoteActions,
-      ModalWindow,
+      GlassIcon,
       UndoRedoButtons,
       NoteTitle
     },
@@ -84,17 +83,12 @@
       const store = useNotesStore()
       const note = computed(() => store.currentNote)
 
-      // Where the user was heading when the unsaved-changes dialog stopped them.
-      const pendingPath = ref<string | null>(null)
-      let leaveConfirmed = false
-
       const { currentRoute } = router
       const fetchNote = async () => {
         if (currentRoute.value.params.id) {
           const routeId: number = +currentRoute.value.params.id
           if (!store.openNote(routeId)) {
             // Stale or mistyped link: there is nothing to edit.
-            leaveConfirmed = true
             router.replace("/")
             return
           }
@@ -108,6 +102,22 @@
       }
       onMounted(fetchNote)
 
+      // Autosave: every change that Save would have written is written as it
+      // happens, undo and redo included. A new note is only stored once it
+      // has something in it.
+      const justSaved = ref(false)
+      let savedTimer: ReturnType<typeof setTimeout> | undefined
+      onBeforeUnmount(() => clearTimeout(savedTimer))
+      const persist = () => {
+        if (!store.currentId || !store.hasUnsavedChanges) return
+        if (store.isEmptyNote && !store.isSavedNote) return
+        store.saveNote()
+        justSaved.value = true
+        clearTimeout(savedTimer)
+        savedTimer = setTimeout(() => (justSaved.value = false), SAVED_FLAG_MS)
+      }
+      watch(() => store.currentNote, persist, { deep: true })
+
       const updateTitle = (title: string) => {
         store.updateTitle(title)
       }
@@ -116,7 +126,7 @@
       // needed while that row mounts; clearing it keeps a row brought back by
       // redo from reopening.
       const newTodoId = ref<number | null>(null)
-      // One blank row at a time: a second one would only be dropped on Save.
+      // One blank row at a time: a second one would never be stored.
       const hasEmptyTodo = computed(() =>
         note.value.todos.some((todo) => todo.text === "")
       )
@@ -154,30 +164,33 @@
         store.updateTodo(index, { completed })
       }
 
-      // Every way out of the editor (buttons, nav, browser Back) passes here.
-      onBeforeRouteLeave((to) => {
-        if (store.hasUnsavedChanges && !leaveConfirmed) {
-          pendingPath.value = to.fullPath
-          return false
-        }
+      const closeEditor = () => {
+        router.push("/")
+      }
+
+      // Escape closes the note, like the cross. A dialog on screen takes the
+      // key for itself, and inside a text field Escape only closes the field.
+      useEventListener(document, "keydown", (event: KeyboardEvent) => {
+        if (event.key !== "Escape" || event.defaultPrevented) return
+        if (document.querySelector("[aria-modal='true']")) return
+        const target = event.target as HTMLElement | null
+        if (target?.closest("input:not([type='checkbox']), textarea, [contenteditable]")) return
+        closeEditor()
+      })
+
+      // Every way out of the editor (the close button, nav, browser Back)
+      // passes here. Write any change the watcher hasn't reached yet, and
+      // don't leave a note behind that was emptied out.
+      onBeforeRouteLeave(() => {
+        persist()
+        if (store.isSavedNote && store.isEmptyNote) store.deleteNote(store.currentId)
         store.closeNote()
       })
 
-      const leave = () => {
-        const path = pendingPath.value
-        pendingPath.value = null
-        leaveConfirmed = true
-        if (path) router.push(path)
-      }
-      const keepEditing = () => {
-        pendingPath.value = null
-      }
-
       return {
         note,
-        pendingPath,
-        leave,
-        keepEditing,
+        justSaved,
+        closeEditor,
         newTodoId,
         hasEmptyTodo,
         addNewTodo,

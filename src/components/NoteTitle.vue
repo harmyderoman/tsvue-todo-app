@@ -10,7 +10,8 @@
       {{ title ? title : "Click to edit Title" }}
     </button>
   </h1>
-  <!-- keydown, not keyup: the Enter that opened the field must not close it -->
+  <!-- keydown, not keyup: the Enter that opened the field must not close it.
+       Escape only closes the field; .stop keeps it from closing the note too. -->
   <input
     v-else
     ref="titleRef"
@@ -20,6 +21,7 @@
     :value="title"
     @input="onTextChange"
     @keydown.enter="finishWithKeyboard"
+    @keydown.esc.stop="finishWithKeyboard"
   />
 </template>
 

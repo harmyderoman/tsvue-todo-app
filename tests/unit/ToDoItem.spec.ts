@@ -8,8 +8,8 @@ const mountTodo = (todo: Partial<ToDo> = {}) =>
     props: { todo: { text: "Buy milk", completed: false, ...todo } }
   })
 
-const buttonByText = (wrapper: ReturnType<typeof mountTodo>, text: string) =>
-  wrapper.findAll("button").find((button) => button.text() === text)!
+const buttonByLabel = (wrapper: ReturnType<typeof mountTodo>, label: string) =>
+  wrapper.find(`button[aria-label="${label}"]`)
 
 describe("ToDoItem", () => {
   it("shows the todo text", () => {
@@ -56,14 +56,24 @@ describe("ToDoItem", () => {
     expect(wrapper.emitted("update-todo")).toEqual([["Buy oat milk"]])
   })
 
-  it("toggles editing with the Edit / Save button", async () => {
+  it("toggles editing with the pencil / save button", async () => {
     const wrapper = mountTodo()
 
-    await buttonByText(wrapper, "Edit").trigger("click")
+    await buttonByLabel(wrapper, "Edit todo").trigger("click")
     expect(wrapper.find(".todo__input").exists()).toBe(true)
 
-    await buttonByText(wrapper, "Save").trigger("click")
+    await buttonByLabel(wrapper, "Save todo").trigger("click")
     expect(wrapper.find(".todo__input").exists()).toBe(false)
+  })
+
+  it("stops editing on Escape without asking for a new row", async () => {
+    const wrapper = mountTodo()
+
+    await wrapper.find(".todo__text").trigger("click")
+    await wrapper.find(".todo__input").trigger("keydown", { key: "Escape" })
+
+    expect(wrapper.find(".todo__input").exists()).toBe(false)
+    expect(wrapper.emitted("add-next")).toBeUndefined()
   })
 
   it("stops editing on Enter", async () => {
@@ -105,7 +115,7 @@ describe("ToDoItem", () => {
   it("emits remove-todo with the todo", async () => {
     const wrapper = mountTodo()
 
-    await buttonByText(wrapper, "Delete").trigger("click")
+    await buttonByLabel(wrapper, "Delete todo").trigger("click")
 
     expect(wrapper.emitted("remove-todo")).toEqual([
       [{ text: "Buy milk", completed: false }]

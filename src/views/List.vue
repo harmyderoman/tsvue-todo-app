@@ -14,9 +14,11 @@
             class="view-toggle__btn"
             :class="{ 'is-active': view === option.value }"
             :aria-pressed="view === option.value"
+            :aria-label="option.label"
+            :title="option.label"
             @click="view = option.value"
           >
-            {{ option.label }}
+            <glass-icon :name="option.icon" />
           </button>
         </liquid-toggle>
       </div>
@@ -38,9 +40,27 @@
           class="note-card glass"
           :style="{ '--i': Math.min(index, MAX_STAGGER) }"
         >
-          <h2 class="note-card__title" :class="{ 'is-untitled': !note.title }">
-            {{ note.title || "Untitled note" }}
-          </h2>
+          <!-- The whole card opens the note: the title link stretches over it.
+               Share and Delete sit above that layer, so they stay buttons. -->
+          <header class="note-card__head">
+            <h2 class="note-card__title" :class="{ 'is-untitled': !note.title }">
+              <router-link class="note-card__link" :to="`/note/${note.id}`">
+                {{ note.title || "Untitled note" }}
+              </router-link>
+            </h2>
+            <div class="note-card__tools">
+              <share-note :note="note" small />
+              <button
+                class="btn btn--icon btn--sm btn--quiet btn--danger"
+                type="button"
+                aria-label="Delete note"
+                :title="`Delete ${note.title || 'this note'}`"
+                @click="onDeleteNote(note.id)"
+              >
+                <glass-icon name="trash" />
+              </button>
+            </div>
+          </header>
 
           <ul v-if="note.todos.length" class="note-card__todos">
             <li
@@ -66,22 +86,6 @@
             <span>{{ doneCount(note) }} of {{ note.todos.length }} done</span>
           </div>
 
-          <div class="note-card__actions">
-            <button
-              class="btn btn--sm"
-              type="button"
-              @click="$router.push(`/note/${note.id}`)"
-            >
-              Open note
-            </button>
-            <button
-              class="btn btn--sm btn--quiet btn--danger"
-              type="button"
-              @click="onDeleteNote(note.id)"
-            >
-              Delete note
-            </button>
-          </div>
         </article>
       </transition-group>
 
@@ -152,6 +156,8 @@
 <script lang="ts">
   import ModalWindow from "@/components/ModalWindow.vue"
   import LiquidToggle from "@/components/LiquidToggle.vue"
+  import GlassIcon, { type GlassIconName } from "@/components/GlassIcon.vue"
+  import ShareNote from "@/components/ShareNote.vue"
   import Note from "@/models/NoteModel"
   import { useNotesStore } from "@/store"
   import { pinLeaving } from "@/glass"
@@ -163,9 +169,9 @@
   // Where the chosen view is remembered between visits.
   const VIEW_STORAGE_KEY = "todo-app:notes-view"
 
-  const VIEWS: { value: NotesView; label: string }[] = [
-    { value: "cards", label: "Cards" },
-    { value: "list", label: "List" }
+  const VIEWS: { value: NotesView; label: string; icon: GlassIconName }[] = [
+    { value: "cards", label: "Cards", icon: "grid" },
+    { value: "list", label: "List", icon: "rows" }
   ]
   // A card previews this many todos; the rest are summarised as "+N more".
   const PREVIEW_TODOS = 6
@@ -174,7 +180,7 @@
 
   export default defineComponent({
     name: "List",
-    components: { ModalWindow, LiquidToggle },
+    components: { ModalWindow, LiquidToggle, GlassIcon, ShareNote },
     setup() {
       const store = useNotesStore()
       const notes = computed(() => store.notes)

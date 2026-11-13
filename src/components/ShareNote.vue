@@ -1,12 +1,15 @@
 <template>
   <button
-    class="btn btn--quiet btn--share"
+    class="btn btn--icon btn--share"
+    :class="{ 'btn--sm': small }"
     type="button"
-    :disabled="store.isEmptyNote"
-    :title="store.isEmptyNote ? 'Add a title or a todo first' : undefined"
+    aria-label="Share note"
+    :disabled="isEmpty"
+    :title="isEmpty ? 'Add a title or a todo first' : `Share ${target.title || 'this note'}`"
     @click="share"
-  >Share</button>
-  <span v-if="status" role="status">{{ status }}</span>
+  >
+    <glass-icon name="share" />
+  </button>
   <modal-window :show="showLink" @onClose="showLink = false">
     <template #modal-header>Share this note</template>
     <template #modal-body>
@@ -14,6 +17,7 @@
       <label class="share-link">Link
         <input :value="link" readonly aria-label="Shared note link" @focus="selectLink" />
       </label>
+      <span v-if="status" class="share-link__status" role="status">{{ status }}</span>
     </template>
     <template #modal-actions>
       <button class="btn" type="button" @click="copy">Copy link</button>
@@ -25,15 +29,23 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useNotesStore } from '@/store'
+import { useNotesStore, type Draft } from '@/store'
 import { sharedUrl } from '@/sharing'
 import ModalWindow from './ModalWindow.vue'
+import GlassIcon from './GlassIcon.vue'
+
+// Shares the given note, or the one open in the editor when none is given.
+const props = defineProps<{ note?: Draft; small?: boolean }>()
 
 const store = useNotesStore()
+const target = computed(() => props.note ?? store.currentNote)
+const isEmpty = computed(() =>
+  target.value.title.trim() === '' && target.value.todos.every(todo => todo.text.trim() === ''))
+
 const showLink = ref(false)
 const link = ref('')
 const status = ref('')
-const emailLink = computed(() => `mailto:?subject=${encodeURIComponent(store.currentNote.title || 'Shared note')}&body=${encodeURIComponent(link.value)}`)
+const emailLink = computed(() => `mailto:?subject=${encodeURIComponent(target.value.title || 'Shared note')}&body=${encodeURIComponent(link.value)}`)
 const selectLink = (event: FocusEvent) => (event.target as HTMLInputElement).select()
 async function copy() {
   try {
@@ -45,10 +57,10 @@ async function copy() {
 }
 async function share() {
   status.value = ''
-  link.value = sharedUrl(store.currentNote)
+  link.value = sharedUrl(target.value)
   if (navigator.share) {
     try {
-      await navigator.share({ title: store.currentNote.title || 'Shared note', url: link.value })
+      await navigator.share({ title: target.value.title || 'Shared note', url: link.value })
       return
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return

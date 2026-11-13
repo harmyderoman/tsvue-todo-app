@@ -120,11 +120,18 @@ input {
   margin-top: 16px;
 }
 
+.share-link__status {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: var(--lagoon);
+}
+
 .share-link input {
   width: 100%;
   min-width: 0;
   padding: 10px;
-  background: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--foam-faint);
   border-radius: var(--r-sm);
 }
@@ -483,6 +490,182 @@ input {
 }
 
 /* --------------------------------------------------------------------------
+   Icon buttons
+   A round glass bead around one GlassIcon. The icon is an outline in the
+   button's ink over a body filled with the button's own colour, glowing in
+   the dark theme. Each icon makes a small gesture on hover: the bin lifts
+   its lid, the pencil scribbles, the arrow leaves the box, the cross turns.
+   -------------------------------------------------------------------------- */
+
+.btn--icon {
+  --icon-btn: 48px;
+  --icon-size: 24px;
+  --icon-fill: rgba(var(--bubble-top), 0.5);
+  --icon-glow: drop-shadow(0 0 5px rgba(var(--bubble-top), 0.6));
+  flex: none;
+  width: var(--icon-btn);
+  height: var(--icon-btn);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.btn--icon.btn--sm {
+  --icon-btn: 42px;
+  --icon-size: 21px;
+}
+
+/* Hovered, the bead lights up from inside in its own colour. */
+.btn--icon:hover:not(:disabled) {
+  --icon-glow: drop-shadow(0 0 7px rgba(var(--bubble-top), 0.9));
+}
+
+.glass-icon {
+  flex: none;
+  width: var(--icon-size, 22px);
+  height: var(--icon-size, 22px);
+  overflow: visible;
+  filter: var(--icon-glow, none);
+  transition:
+    scale 0.45s var(--spring),
+    rotate 0.55s var(--spring),
+    filter 0.3s ease;
+}
+
+.glass-icon__fill {
+  fill: var(--icon-fill, rgba(255, 255, 255, 0.25));
+}
+
+/* Pressed, the icon squashes into the glass and springs back on release. */
+.btn--icon:active:not(:disabled) .glass-icon {
+  scale: 0.78;
+  transition-duration: 0.12s;
+}
+
+.glass-icon__lid,
+.glass-icon__arrow,
+.glass-icon__spin,
+.glass-icon__pencil {
+  transition: transform 0.5s var(--spring);
+}
+
+.glass-icon__lid {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+}
+
+.glass-icon__pencil {
+  transform-box: view-box;
+  transform-origin: 5px 19.5px;
+}
+
+.glass-icon__spin {
+  transform-box: view-box;
+  transform-origin: 12px 12.5px;
+}
+
+.glass-icon__line {
+  stroke-dasharray: 7;
+}
+
+/* The tick draws itself in whenever it appears. */
+.glass-icon__draw {
+  stroke-dasharray: 21;
+  animation: icon-draw 0.5s var(--glide) both;
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon__lid {
+  transform: translate(-0.6px, -1.8px) rotate(-26deg);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon__pencil {
+  animation: icon-scribble 0.75s ease-in-out;
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon__line {
+  animation: icon-underline 0.75s var(--glide);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon__arrow {
+  transform: translateY(-2.8px);
+}
+
+/* Save: the disk dips as if pressed home, and its shutter slides across. */
+.glass-icon__shutter {
+  transition: transform 0.45s var(--spring);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon--save {
+  animation: icon-stamp 0.6s var(--spring);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon__shutter {
+  transform: translateX(1.6px);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon--close {
+  rotate: 90deg;
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon--undo .glass-icon__spin {
+  transform: rotate(-32deg);
+}
+
+.btn--icon:is(:hover, :focus-visible):not(:disabled) .glass-icon--redo .glass-icon__spin {
+  transform: rotate(32deg);
+}
+
+@keyframes icon-draw {
+  from { stroke-dashoffset: 21; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes icon-stamp {
+  40% { translate: 0 2px; scale: 1.08 0.88; }
+  70% { translate: 0 -1px; scale: 0.97 1.04; }
+}
+
+@keyframes icon-scribble {
+  25% { transform: rotate(-14deg); }
+  50% { transform: rotate(9deg); }
+  75% { transform: rotate(-4deg); }
+}
+
+@keyframes icon-underline {
+  from { stroke-dashoffset: 7; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Disabled: the glass goes matte and the icon stops glowing. */
+.btn--icon:disabled {
+  --icon-fill: rgba(255, 255, 255, 0.06);
+  --icon-glow: none;
+}
+
+.btn--icon:disabled .glass-icon {
+  opacity: 0.55;
+}
+
+[data-theme='light'] .btn--icon {
+  --icon-fill: rgba(255, 255, 255, 0.78);
+  --icon-glow: drop-shadow(0 1px 1px rgba(var(--bubble-shadow), 0.35));
+}
+
+[data-theme='light'] .btn--icon:hover:not(:disabled) {
+  --icon-glow: drop-shadow(0 1px 2px rgba(var(--bubble-shadow), 0.45)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+}
+
+[data-theme='light'] .btn--icon:disabled {
+  --icon-fill: rgba(27, 69, 85, 0.05);
+  --icon-glow: none;
+}
+
+@media (pointer: coarse) {
+  .btn--icon.btn--sm {
+    --icon-btn: 44px;
+  }
+}
+
+/* --------------------------------------------------------------------------
    Page header
    -------------------------------------------------------------------------- */
 
@@ -518,20 +701,60 @@ input {
 }
 
 .view-toggle__btn {
+  --icon-size: 23px;
+  --icon-fill: rgba(53, 224, 200, 0.18);
   position: relative;
   z-index: 1;
-  padding: 6px 14px;
+  display: grid;
+  place-items: center;
+  padding: 8px 16px;
   border: 0;
   border-radius: 999px;
   background: none;
-  font-size: 0.875rem;
-  font-weight: 500;
   color: var(--foam-dim);
   cursor: pointer;
   transition:
     color 0.3s ease,
     background 0.3s ease,
     box-shadow 0.3s ease;
+}
+
+/* The chosen view fills with colour and glows; the other stays a sketch. */
+.view-toggle__btn.is-active {
+  --icon-fill: rgba(53, 224, 200, 0.55);
+  --icon-glow: drop-shadow(0 0 5px rgba(53, 224, 200, 0.65));
+}
+
+/* On hover the tiles drift apart and the rows slide out, one after another. */
+.view-toggle__btn .glass-icon__part {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.45s var(--spring);
+}
+
+.view-toggle__btn:is(:hover, :focus-visible):not(.is-active) .glass-icon--grid .glass-icon__part:nth-child(1) { transform: translate(-1px, -1px); }
+.view-toggle__btn:is(:hover, :focus-visible):not(.is-active) .glass-icon--grid .glass-icon__part:nth-child(2) { transform: translate(1px, -1px); }
+.view-toggle__btn:is(:hover, :focus-visible):not(.is-active) .glass-icon--grid .glass-icon__part:nth-child(3) { transform: translate(-1px, 1px); }
+.view-toggle__btn:is(:hover, :focus-visible):not(.is-active) .glass-icon--grid .glass-icon__part:nth-child(4) { transform: translate(1px, 1px); }
+
+.view-toggle__btn:is(:hover, :focus-visible):not(.is-active) .glass-icon--rows .glass-icon__part {
+  transform: translateX(2px);
+}
+.view-toggle__btn .glass-icon--rows .glass-icon__part:nth-child(2) { transition-delay: 0.05s; }
+.view-toggle__btn .glass-icon--rows .glass-icon__part:nth-child(3) { transition-delay: 0.1s; }
+
+.view-toggle__btn:active:not(.is-active) .glass-icon {
+  scale: 0.8;
+  transition-duration: 0.12s;
+}
+
+[data-theme='light'] .view-toggle__btn {
+  --icon-fill: rgba(8, 124, 112, 0.12);
+}
+
+[data-theme='light'] .view-toggle__btn.is-active {
+  --icon-fill: rgba(255, 255, 255, 0.85);
+  --icon-glow: drop-shadow(0 1px 1px rgba(8, 124, 112, 0.35));
 }
 
 .view-toggle__btn:hover {
@@ -574,9 +797,51 @@ input {
     0 44px 80px -26px rgba(0, 0, 0, 0.85);
 }
 
+.note-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .note-card__title {
+  min-width: 0;
+  padding-top: 6px;
   font-size: 1.5rem;
   overflow-wrap: anywhere;
+}
+
+.note-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Stretched over the whole card, so a click anywhere on it opens the note */
+.note-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.note-card__link:focus-visible {
+  outline: none;
+}
+
+.note-card:has(.note-card__link:focus-visible) {
+  outline: 2px solid var(--lagoon);
+  outline-offset: 3px;
+}
+
+/* Share and Delete, above the stretched link */
+.note-card__tools {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  gap: 8px;
 }
 
 .note-card__title.is-untitled {
@@ -647,11 +912,6 @@ input {
   transition: transform 0.8s var(--glide);
 }
 
-.note-card__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
 
 /* List view: one glass strip per note with just its title and progress */
 .notes--list {
@@ -753,22 +1013,33 @@ input {
   border-radius: var(--r-lg);
 }
 
+/* Top: undo and redo with the autosave confirmation beside them, and the
+   close cross in the corner. Bottom: Add todo, and the note's Share and Delete. */
 .editor__bar,
+.editor__footer,
 .editor__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
 }
 
-.editor__actions {
-  align-items: center;
-  justify-content: flex-end;
+.editor__footer {
+  justify-content: space-between;
   padding-top: 12px;
 }
 
-/* Confirmation that appears next to the actions after Save */
+.editor__close {
+  margin: -6px -6px 0 auto;
+}
+
+/* Shown for a moment each time autosave writes the note */
 .saved-flag {
-  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--lagoon);
   opacity: 0;
@@ -776,6 +1047,11 @@ input {
   transition:
     opacity 0.4s ease,
     transform 0.5s var(--spring);
+}
+
+.saved-flag .glass-icon {
+  --icon-size: 17px;
+  --icon-fill: rgba(53, 224, 200, 0.3);
 }
 
 .saved-flag.is-visible {
@@ -887,52 +1163,118 @@ input.note-title,
   gap: 8px;
 }
 
-/* Checkbox: an empty glass bead that fills with liquid when ticked */
+/* Checkbox: a glass bead in the icon-button style. Empty, it is clear slate
+   glass; ticked, it fills with lagoon and the tick draws itself in. The
+   native input is the bead itself, with a GlassIcon tick laid over it. */
+.check-bead {
+  --icon-size: 20px;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  transition: scale 0.35s var(--spring);
+}
+
+.check-bead > * {
+  grid-area: 1 / 1;
+}
+
+.check-bead:hover {
+  scale: 1.08;
+}
+
 .check {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  --bubble-top: 228, 237, 242;
+  --bubble-bottom: 158, 181, 194;
+  --bubble-shadow: 71, 99, 116;
+  --check-body: 0.12;
+  width: 100%;
+  height: 100%;
   margin: 0;
   appearance: none;
   -webkit-appearance: none;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border: 0;
   border-radius: 50%;
-  /* layers, top to bottom: tick, liquid fill, empty glass */
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23071a24' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-8'/%3E%3C/svg%3E")
-      center / 0 no-repeat,
-    radial-gradient(circle, var(--lagoon) 60%, transparent 62%) center / 0 0 no-repeat,
-    rgba(255, 255, 255, 0.08);
+    radial-gradient(120% 95% at 50% -25%, rgba(255, 255, 255, 0.4), transparent 64%),
+    radial-gradient(85% 80% at 50% 130%, rgba(var(--bubble-top), 0.5), transparent 72%),
+    linear-gradient(
+      160deg,
+      rgba(var(--bubble-top), var(--check-body)),
+      rgba(var(--bubble-bottom), calc(var(--check-body) * 1.4))
+    );
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.45),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 0 0 1px rgba(var(--bubble-top), 0.4),
+    inset 0 -5px 7px -5px rgba(var(--bubble-shadow), 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 6px 12px -6px rgba(var(--bubble-bottom), 0.6);
   cursor: pointer;
-  transition:
-    background-size 0.45s var(--glide),
-    box-shadow 0.45s ease,
-    border-color 0.3s ease,
-    transform 0.35s var(--spring);
-}
-
-.check:hover {
-  transform: scale(1.1);
-  border-color: var(--lagoon);
+  transition: box-shadow 0.3s ease;
 }
 
 .check:checked {
-  border-color: var(--lagoon);
-  background-size: 100%, 180% 180%, auto;
-  box-shadow:
-    inset 0 2px 2px rgba(255, 255, 255, 0.6),
-    inset 0 -3px 4px rgba(0, 60, 60, 0.35),
-    0 0 16px rgba(53, 224, 200, 0.6);
+  --bubble-top: 67, 225, 192;
+  --bubble-bottom: 5, 158, 132;
+  --bubble-shadow: 8, 124, 112;
+  --check-body: 0.5;
   animation: bead-pop 0.5s var(--spring);
 }
 
 @keyframes bead-pop {
   40% {
-    transform: scale(1.28);
+    scale: 1.25;
   }
+}
+
+.check-bead .glass-icon {
+  color: #fff;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(53, 224, 200, 0.9));
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.check-bead .glass-icon__draw {
+  animation: none;
+  stroke-dashoffset: 21;
+  transition: stroke-dashoffset 0.4s var(--glide);
+}
+
+.check:checked + .glass-icon {
+  opacity: 1;
+}
+
+/* Hovering an empty bead previews the tick. */
+.check:hover:not(:checked) + .glass-icon {
+  opacity: 0.4;
+  filter: none;
+}
+
+.check:checked + .glass-icon .glass-icon__draw,
+.check:hover:not(:checked) + .glass-icon .glass-icon__draw {
+  stroke-dashoffset: 0;
+}
+
+[data-theme='light'] .check {
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.95), transparent 62%),
+    linear-gradient(160deg, rgba(var(--bubble-top), 0.7), rgba(var(--bubble-bottom), 0.55));
+  box-shadow:
+    inset 0 2px 1px rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(var(--bubble-shadow), 0.3),
+    inset 0 -3px 5px rgba(var(--bubble-shadow), 0.2),
+    0 2px 3px rgba(var(--bubble-shadow), 0.2),
+    0 6px 12px -4px rgba(var(--bubble-shadow), 0.35);
+}
+
+[data-theme='light'] .check-bead .glass-icon {
+  filter: drop-shadow(0 1px 1px rgba(8, 124, 112, 0.6));
+}
+
+[data-theme='light'] .check:hover:not(:checked) + .glass-icon {
+  color: #3c6470;
 }
 
 /* --------------------------------------------------------------------------
@@ -1605,16 +1947,14 @@ input.note-title,
 }
 /* Buttons bring their own colour (see .btn); the other beads are lagoon. */
 [data-theme='light'] .liquid-toggle__drop,
-[data-theme='light'] .modal__close,
-[data-theme='light'] .check {
+[data-theme='light'] .modal__close {
   --bubble-top: 102,224,202;
   --bubble-bottom: 18,164,146;
   --bubble-shadow: 8,124,112;
 }
 [data-theme='light'] .liquid-toggle__drop,
 [data-theme='light'] .btn,
-[data-theme='light'] .modal__close,
-[data-theme='light'] .check {
+[data-theme='light'] .modal__close {
   --bubble-fill:
     radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.95), transparent 62%),
     linear-gradient(160deg, rgba(var(--bubble-top),.7), rgba(var(--bubble-bottom),.55));
@@ -1630,10 +1970,6 @@ input.note-title,
 [data-theme='light'] .btn--share {
   color: #183d79;
 }
-[data-theme='light'] .check {
-  --bubble-top: 67,225,192;
-  --bubble-bottom: 5,158,132;
-}
 [data-theme='light'] .btn--danger {
   color: #a21e40;
 }
@@ -1644,18 +1980,8 @@ input.note-title,
 }
 [data-theme='light'] input.note-title,
 [data-theme='light'] .todo__input {
-  background: rgba(255,255,255,.6);
+  background: rgba(255,255,255,.08);
   box-shadow: inset 0 2px 4px rgba(27,69,85,.17), 0 0 0 2px rgba(8,124,112,.55);
-}
-[data-theme='light'] .check {
-  border-color: transparent;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23071a24' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.6 7.4-8'/%3E%3C/svg%3E") center / 0 no-repeat,
-    var(--bubble-fill);
-  background-size: 0, 100% 100%, 100% 100%;
-}
-[data-theme='light'] .check:checked {
-  background-size: 100%, 100% 100%, 100% 100%;
 }
 [data-theme='light'] .meter { background: rgba(27,69,85,.12); }
 [data-theme='light'] .note-card__todo::before { background: #8a9ea6; }
@@ -1678,9 +2004,9 @@ input.note-title,
     align-items: center;
   }
 
-  .check {
-    width: 32px;
-    height: 32px;
+  .check-bead {
+    width: 34px;
+    height: 34px;
   }
 
   .modal__close {

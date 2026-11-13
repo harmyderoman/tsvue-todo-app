@@ -129,7 +129,7 @@ describe("notes store", () => {
       ])
     })
 
-    it("drops todos without text, from the saved note and from the draft", () => {
+    it("leaves todos without text out of the saved note, but keeps them in the draft", () => {
       store.startNewNote()
       store.currentNote = {
         title: "Groceries",
@@ -142,7 +142,7 @@ describe("notes store", () => {
       store.saveNote()
 
       expect(store.notes[0].todos).toEqual([{ text: "Milk", completed: false }])
-      expect(store.currentNote.todos).toHaveLength(1)
+      expect(store.currentNote.todos).toHaveLength(2)
     })
 
     it("updates an existing note instead of adding a duplicate", () => {

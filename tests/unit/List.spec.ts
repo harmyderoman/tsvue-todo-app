@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { mount, RouterLinkStub } from "@vue/test-utils"
 import List from "@/views/List.vue"
 import { freshStore, NotesStore, seedNote } from "./helpers"
+import { decodeNote } from "@/sharing"
 
 let store: NotesStore
 
@@ -17,6 +18,9 @@ const mountList = () =>
 
 const buttonByText = (wrapper: ReturnType<typeof mountList>, text: string) =>
   wrapper.findAll("button").find((button) => button.text() === text)!
+
+const deleteButton = (wrapper: ReturnType<typeof mountList>) =>
+  wrapper.find('button[aria-label="Delete note"]')
 
 describe("List", () => {
   beforeEach(() => {
@@ -64,13 +68,26 @@ describe("List", () => {
     expect(wrapper.find(".note-card__title").text()).toBe("Untitled note")
   })
 
-  it("opens a note", async () => {
+  it("links the whole card to its note, with the title as the link text", () => {
     const id = seedNote(store, "Groceries", [])
     const wrapper = mountList()
 
-    await buttonByText(wrapper, "Open note").trigger("click")
+    const link = wrapper.find(".note-card").findComponent(RouterLinkStub)
+    expect(link.props("to")).toBe(`/note/${id}`)
+    expect(link.text()).toBe("Groceries")
+    expect(wrapper.text()).not.toContain("Open note")
+  })
 
-    expect(push).toHaveBeenCalledWith(`/note/${id}`)
+  it("shares the note on its card, not the one in the editor", async () => {
+    seedNote(store, "Groceries", [{ text: "Milk", completed: false }])
+    store.currentNote = { title: "Something else", todos: [] }
+    const wrapper = mountList()
+
+    await wrapper.find(".note-card").find('button[aria-label="Share note"]').trigger("click")
+
+    const link = wrapper.find<HTMLInputElement>(".share-link input").element.value
+    const data = new URL(link).searchParams.get("data")!
+    expect(decodeNote(data)).toEqual({ title: "Groceries", todos: [{ text: "Milk", completed: false }] })
   })
 
   it("deletes a note only after confirmation", async () => {
@@ -78,7 +95,7 @@ describe("List", () => {
     seedNote(store, "Trip", [])
     const wrapper = mountList()
 
-    await buttonByText(wrapper, "Delete note").trigger("click")
+    await deleteButton(wrapper).trigger("click")
     expect(wrapper.find(".modal").exists()).toBe(true)
     expect(store.notes).toHaveLength(2)
 
@@ -93,7 +110,7 @@ describe("List", () => {
     seedNote(store, "Groceries", [])
     const wrapper = mountList()
 
-    await buttonByText(wrapper, "Delete note").trigger("click")
+    await deleteButton(wrapper).trigger("click")
     await buttonByText(wrapper, "Cancel").trigger("click")
 
     expect(wrapper.find(".modal").exists()).toBe(false)
@@ -118,7 +135,7 @@ describe("List", () => {
 
   describe("view switch", () => {
     const toggle = (wrapper: ReturnType<typeof mountList>, label: string) =>
-      wrapper.findAll(".view-toggle__btn").find((button) => button.text() === label)!
+      wrapper.find(`.view-toggle__btn[aria-label="${label}"]`)
 
     const seedTwo = () => {
       seedNote(store, "Groceries", [
