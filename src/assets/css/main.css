@@ -21,13 +21,13 @@
   /* A sheen pooled in the top-left corner over a body that thins out in
      the middle and catches light again at the far edge. */
   --glass-fill:
-    radial-gradient(130% 80% at 12% -12%, rgba(255, 255, 255, 0.26), transparent 56%),
+    radial-gradient(130% 80% at 12% -12%, rgba(255, 255, 255, 0.15), transparent 56%),
     linear-gradient(
       140deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(255, 255, 255, 0.04) 48%,
-      rgba(255, 255, 255, 0.02) 62%,
-      rgba(255, 255, 255, 0.13)
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.015) 48%,
+      rgba(255, 255, 255, 0.008) 62%,
+      rgba(255, 255, 255, 0.07)
     );
   /* Rim light: bright where the light enters (top-left) and where it leaves
      (bottom-right), nearly invisible in between. Drawn by .glass::after. */
@@ -38,8 +38,8 @@
     rgba(255, 255, 255, 0.04) 62%,
     rgba(255, 255, 255, 0.5)
   );
-  --glass-blur: blur(26px) saturate(190%);
-  --card-fill: linear-gradient(145deg, rgba(255,255,255,.05), rgba(7,26,36,.07) 55%, rgba(255,255,255,.025));
+  --glass-blur: blur(14px) saturate(170%);
+  --card-fill: linear-gradient(145deg, rgba(255,255,255,.025), rgba(7,26,36,.03) 55%, rgba(255,255,255,.012));
   /* Thickness: a specular line under the top edge, a soft band of light below
      it, light pooling along the bottom, and a faint inner glow. */
   --glass-inset:
@@ -185,7 +185,7 @@ input {
 .editor,
 .about__card {
   --glass-fill: var(--card-fill);
-  --glass-blur: blur(4px) saturate(135%);
+  --glass-blur: blur(2px) saturate(130%);
   --glass-sheen: .3;
   --glass-hover-sheen: .6;
 }
@@ -250,7 +250,7 @@ input {
 /* Recessed well carved into a glass pane: shaded under its top lip, lit
    along its bottom lip. */
 .well {
-  background: rgba(3, 13, 19, 0.32);
+  background: rgba(3, 13, 19, 0.18);
   border-radius: var(--r-sm);
   box-shadow:
     inset 0 2px 7px rgba(0, 0, 0, 0.5),
@@ -367,8 +367,8 @@ input {
   --bubble-shadow: 8, 124, 112;
   /* dark theme only: how much colour the glass holds, and how strong the
      sheet of light across its top is */
-  --btn-body: 0.3;
-  --btn-gloss: 0.42;
+  --btn-body: 0.2;
+  --btn-gloss: 0.34;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -447,29 +447,29 @@ input {
   --bubble-top: 228, 237, 242;
   --bubble-bottom: 158, 181, 194;
   --bubble-shadow: 71, 99, 116;
-  --btn-body: 0.2;
-  --btn-gloss: 0.26;
+  --btn-body: 0.1;
+  --btn-gloss: 0.22;
 }
 
 .btn--share {
   --bubble-top: 157, 205, 255;
   --bubble-bottom: 75, 132, 225;
   --bubble-shadow: 45, 84, 160;
-  --btn-body: 0.38;
+  --btn-body: 0.26;
   color: #dce9ff;
 }
 
 .btn--accent {
   --bubble-top: 67, 225, 192;
   --bubble-bottom: 5, 158, 132;
-  --btn-body: 0.42;
+  --btn-body: 0.3;
 }
 
 .btn--danger {
   --bubble-top: 255, 159, 177;
   --bubble-bottom: 225, 63, 102;
   --bubble-shadow: 164, 33, 66;
-  --btn-body: 0.4;
+  --btn-body: 0.28;
   color: #ffd6dd;
 }
 
@@ -1259,8 +1259,8 @@ input.note-title,
 
 [data-theme='light'] .check {
   background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.95), transparent 62%),
-    linear-gradient(160deg, rgba(var(--bubble-top), 0.7), rgba(var(--bubble-bottom), 0.55));
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.8), transparent 62%),
+    linear-gradient(160deg, rgba(var(--bubble-top), 0.48), rgba(var(--bubble-bottom), 0.34));
   box-shadow:
     inset 0 2px 1px rgba(255, 255, 255, 0.95),
     inset 0 0 0 1px rgba(var(--bubble-shadow), 0.3),
@@ -1374,13 +1374,15 @@ input.note-title,
    -------------------------------------------------------------------------- */
 
 .glass-tip {
-  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.07) 60%, rgba(53, 224, 200, 0.12));
+  /* Nearly clear glass: almost no fill, so the page shows through. The rim
+     and the blur behind it are what keep the bubble and its text legible. */
+  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02) 60%, rgba(53, 224, 200, 0.05));
   --tip-rim:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    inset 0 -6px 10px -8px rgba(53, 224, 200, 0.5);
-  --tip-drop: 0 12px 26px -10px rgba(0, 0, 0, 0.65);
-  --tip-blur: blur(16px) saturate(180%);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 -6px 10px -8px rgba(53, 224, 200, 0.4);
+  --tip-drop: 0 10px 22px -12px rgba(0, 0, 0, 0.45);
+  --tip-blur: blur(10px) saturate(160%);
   position: fixed;
   top: 0;
   left: 0;
@@ -1458,12 +1460,12 @@ input.note-title,
 }
 
 [data-theme='light'] .glass-tip {
-  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55) 60%, rgba(102, 224, 202, 0.35));
+  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.12) 60%, rgba(102, 224, 202, 0.12));
   --tip-rim:
     inset 0 1px 0 #fff,
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
-    inset 0 -6px 10px -8px rgba(8, 124, 112, 0.35);
-  --tip-drop: 0 10px 22px -10px rgba(8, 90, 82, 0.45);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.65),
+    inset 0 -6px 10px -8px rgba(8, 124, 112, 0.3);
+  --tip-drop: 0 10px 20px -12px rgba(8, 90, 82, 0.35);
 }
 
 /* --------------------------------------------------------------------------
@@ -1477,9 +1479,9 @@ input.note-title,
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(3, 13, 19, 0.55);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(3, 13, 19, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .modal__dialog {
@@ -1697,7 +1699,7 @@ input.note-title,
   /* How long the lens takes to cross the pill. The labels and icons keep
      pace with it, so this one value speeds up or slows down the whole switch. */
   --switch-speed: 2s;
-  --pill-fill: linear-gradient(180deg, rgba(16, 42, 50, .88), rgba(3, 13, 19, .92));
+  --pill-fill: linear-gradient(180deg, rgba(16, 42, 50, .5), rgba(3, 13, 19, .6));
   --pill-inset:
     inset 0 1px 0 rgba(255, 255, 255, .16),
     inset 0 -1px 0 rgba(0, 0, 0, .5),
@@ -1867,7 +1869,7 @@ input.note-title,
 }
 
 [data-theme='light'] .theme-switch {
-  --pill-fill: linear-gradient(180deg, rgba(20, 138, 124, .94), rgba(8, 124, 112, .96));
+  --pill-fill: linear-gradient(180deg, rgba(20, 138, 124, .72), rgba(8, 124, 112, .8));
   --pill-inset:
     inset 0 1px 0 rgba(255, 255, 255, .55),
     inset 0 -1px 0 rgba(3, 60, 54, .45),
@@ -1983,10 +1985,10 @@ input.note-title,
   --foam-faint: #536b77;
   --lagoon: #087c70;
   --periwinkle: #596bc7;
-  --card-fill: linear-gradient(145deg, rgba(255,255,255,.14), rgba(237,249,246,.05) 55%, rgba(255,255,255,.1));
+  --card-fill: linear-gradient(145deg, rgba(255,255,255,.07), rgba(237,249,246,.02) 55%, rgba(255,255,255,.05));
   --glass-fill:
-    radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.98), transparent 58%),
-    linear-gradient(145deg, rgba(255,255,255,.76), rgba(221,237,241,.4) 52%, rgba(255,255,255,.72));
+    radial-gradient(130% 85% at 10% -15%, rgba(255,255,255,.6), transparent 58%),
+    linear-gradient(145deg, rgba(255,255,255,.36), rgba(221,237,241,.14) 52%, rgba(255,255,255,.32));
   --glass-rim: linear-gradient(145deg, #fff, rgba(255,255,255,.85) 24%, rgba(66,108,123,.3) 65%, #fff);
   --glass-inset:
     inset 0 2px 1px rgba(255,255,255,.98),
@@ -2010,7 +2012,7 @@ input.note-title,
 [data-theme='light'] .glass::before {
   background:
     radial-gradient(ellipse 150px 90px at var(--mx, 50%) var(--my, 0%), rgba(30,80,96,.22), transparent 72%),
-    radial-gradient(ellipse at 18% 25%, rgba(255,255,255,.8), transparent 48%),
+    radial-gradient(ellipse at 18% 25%, rgba(255,255,255,.5), transparent 48%),
     radial-gradient(ellipse at 82% 75%, rgba(61,172,174,.16), transparent 52%),
     linear-gradient(115deg, transparent 30%, rgba(255,255,255,.7) 44%, transparent 57%);
   background-size: 100% 100%, 170% 180%, 180% 170%, 230% 100%;
@@ -2021,7 +2023,7 @@ input.note-title,
     var(--glass-rim);
 }
 [data-theme='light'] .well {
-  background: linear-gradient(180deg, rgba(109,153,168,.16), rgba(255,255,255,.3));
+  background: linear-gradient(180deg, rgba(109,153,168,.1), rgba(255,255,255,.12));
   box-shadow:
     inset 0 2px 5px rgba(27,69,85,.19),
     inset 0 1px 2px rgba(27,69,85,.12),
@@ -2055,8 +2057,8 @@ input.note-title,
 [data-theme='light'] .btn,
 [data-theme='light'] .modal__close {
   --bubble-fill:
-    radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.95), transparent 62%),
-    linear-gradient(160deg, rgba(var(--bubble-top),.7), rgba(var(--bubble-bottom),.55));
+    radial-gradient(ellipse at 30% 0%, rgba(255,255,255,.8), transparent 62%),
+    linear-gradient(160deg, rgba(var(--bubble-top),.48), rgba(var(--bubble-bottom),.34));
   background: var(--bubble-fill);
   box-shadow:
     inset 0 2px 1px rgba(255,255,255,.95),
@@ -2085,7 +2087,7 @@ input.note-title,
 [data-theme='light'] .meter { background: rgba(27,69,85,.12); }
 [data-theme='light'] .note-card__todo::before { background: #8a9ea6; }
 [data-theme='light'] .note-card__todo.completed::before { background: var(--lagoon); }
-[data-theme='light'] .modal { background: rgba(53,81,92,.25); }
+[data-theme='light'] .modal { background: rgba(53,81,92,.14); }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-theme='light'] .glass { background: #f5fafb; }
