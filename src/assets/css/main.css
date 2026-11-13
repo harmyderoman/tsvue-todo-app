@@ -1368,6 +1368,105 @@ input.note-title,
 }
 
 /* --------------------------------------------------------------------------
+   Tooltips (src/tooltip.ts)
+   A small glass cloud, joined to what it describes by two tiny bubbles, like
+   a thought in a comic. It swells into place from that tail.
+   -------------------------------------------------------------------------- */
+
+.glass-tip {
+  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.07) 60%, rgba(53, 224, 200, 0.12));
+  --tip-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    inset 0 -6px 10px -8px rgba(53, 224, 200, 0.5);
+  --tip-drop: 0 12px 26px -10px rgba(0, 0, 0, 0.65);
+  --tip-blur: blur(16px) saturate(180%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 300;
+  /* Its own width wherever it sits: pinned near the right edge, it would
+     otherwise shrink to the room left and wrap. */
+  width: max-content;
+  max-width: min(260px, calc(100vw - 16px));
+  padding: 7px 13px;
+  border-radius: 16px;
+  background: var(--tip-glass);
+  box-shadow: var(--tip-rim), var(--tip-drop);
+  -webkit-backdrop-filter: var(--tip-blur);
+  backdrop-filter: var(--tip-blur);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--foam);
+  pointer-events: none;
+  opacity: 0;
+  scale: 0.8;
+  filter: blur(3px);
+  transform-origin: var(--tail-x, 50%) calc(100% + 14px);
+  transition:
+    opacity 0.18s ease,
+    scale 0.4s var(--spring),
+    filter 0.2s ease;
+}
+
+.glass-tip[data-side='below'] {
+  transform-origin: var(--tail-x, 50%) -14px;
+}
+
+.glass-tip.is-visible {
+  opacity: 1;
+  scale: 1;
+  filter: none;
+}
+
+/* The tail: a small bubble, then a smaller one nearer the element. */
+.glass-tip::before,
+.glass-tip::after {
+  content: '';
+  position: absolute;
+  left: var(--tail-x, 50%);
+  border-radius: 50%;
+  background: var(--tip-glass);
+  box-shadow: var(--tip-rim);
+  -webkit-backdrop-filter: var(--tip-blur);
+  backdrop-filter: var(--tip-blur);
+}
+
+.glass-tip::before {
+  top: calc(100% + 2px);
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+}
+
+.glass-tip::after {
+  top: calc(100% + 10px);
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+
+.glass-tip[data-side='below']::before {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+
+.glass-tip[data-side='below']::after {
+  top: auto;
+  bottom: calc(100% + 10px);
+}
+
+[data-theme='light'] .glass-tip {
+  --tip-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55) 60%, rgba(102, 224, 202, 0.35));
+  --tip-rim:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 -6px 10px -8px rgba(8, 124, 112, 0.35);
+  --tip-drop: 0 10px 22px -10px rgba(8, 90, 82, 0.45);
+}
+
+/* --------------------------------------------------------------------------
    Modal
    -------------------------------------------------------------------------- */
 

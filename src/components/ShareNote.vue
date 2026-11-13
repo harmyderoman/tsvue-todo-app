@@ -5,7 +5,7 @@
     type="button"
     aria-label="Share note"
     :disabled="isEmpty"
-    :title="isEmpty ? 'Add a title or a todo first' : `Share ${target.title || 'this note'}`"
+    :data-tip="isEmpty ? 'Add a title or a todo first' : `Share ${target.title || 'this note'}`"
     @click="share"
   >
     <glass-icon name="share" />

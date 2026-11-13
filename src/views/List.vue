@@ -15,7 +15,7 @@
             :class="{ 'is-active': view === option.value }"
             :aria-pressed="view === option.value"
             :aria-label="option.label"
-            :title="option.label"
+            :data-tip="option.label"
             @click="view = option.value"
           >
             <glass-icon :name="option.icon" />
@@ -54,7 +54,7 @@
                 class="btn btn--icon btn--sm btn--quiet btn--danger"
                 type="button"
                 aria-label="Delete note"
-                :title="`Delete ${note.title || 'this note'}`"
+                :data-tip="`Delete ${note.title || 'this note'}`"
                 @click="onDeleteNote(note.id)"
               >
                 <glass-icon name="trash" />

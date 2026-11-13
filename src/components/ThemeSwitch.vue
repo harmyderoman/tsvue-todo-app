@@ -5,7 +5,7 @@
     :style="sizes"
     type="button"
     :aria-label="isDark ? 'Dark theme, switch to light' : 'Light theme, switch to dark'"
-    :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+    :data-tip="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
     @click="toggleTheme"
   >
     <span class="theme-switch__pill" aria-hidden="true">

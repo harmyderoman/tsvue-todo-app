@@ -45,7 +45,7 @@
         class="btn btn--icon btn--sm"
         :class="editable ? 'btn--accent' : 'btn--quiet'"
         :aria-label="editable ? 'Save todo' : 'Edit todo'"
-        :title="editable ? 'Save todo' : 'Edit todo'"
+        :data-tip="editable ? 'Save todo' : 'Edit todo'"
         @click="editable = !editable"
       >
         <glass-icon :name="editable ? 'save' : 'pencil'" />
@@ -54,7 +54,7 @@
         type="button"
         class="btn btn--icon btn--sm btn--quiet btn--danger"
         aria-label="Delete todo"
-        title="Delete todo"
+        data-tip="Delete todo"
         @click="$emit('remove-todo', todo)"
       >
         <glass-icon name="trash" />

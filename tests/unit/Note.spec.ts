@@ -130,7 +130,7 @@ describe("Note editor", () => {
 
       await addTodo().trigger("click")
       expect(addTodo().attributes("disabled")).toBeDefined()
-      expect(addTodo().attributes("title")).toBe("Fill in the empty todo first")
+      expect(addTodo().attributes("data-tip")).toBe("Fill in the empty todo first")
 
       // A click that gets through anyway must not add a second blank row.
       await addTodo().trigger("click")
@@ -138,7 +138,7 @@ describe("Note editor", () => {
 
       await wrapper.find(".todo__input").setValue("Milk")
       expect(addTodo().attributes("disabled")).toBeUndefined()
-      expect(addTodo().attributes("title")).toBeUndefined()
+      expect(addTodo().attributes("data-tip")).toBeUndefined()
     })
 
     it("locks Add todo for an empty todo left closed, too", async () => {

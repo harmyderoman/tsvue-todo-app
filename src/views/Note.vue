@@ -9,7 +9,7 @@
         class="btn btn--icon btn--quiet editor__close"
         type="button"
         aria-label="Close note"
-        title="Close note (Esc)"
+        data-tip="Close note (Esc)"
         aria-keyshortcuts="Escape"
         @click="closeEditor"
       >
@@ -42,7 +42,7 @@
         class="btn"
         type="button"
         :disabled="hasEmptyTodo"
-        :title="hasEmptyTodo ? 'Fill in the empty todo first' : undefined"
+        :data-tip="hasEmptyTodo ? 'Fill in the empty todo first' : undefined"
         @click="addNewTodo"
       >
         <span aria-hidden="true">+</span> Add todo

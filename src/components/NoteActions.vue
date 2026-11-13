@@ -5,7 +5,7 @@
     class="btn btn--icon btn--danger"
     type="button"
     aria-label="Delete note"
-    title="Delete note"
+    data-tip="Delete note"
     @click="showModal = true"
   >
     <glass-icon name="trash" />

@@ -1,5 +1,5 @@
 <template>
-  <router-link class="logo" to="/" aria-label="Todo App, home" title="Todo App" @pointerdown="disturb" @keydown.enter="disturb">
+  <router-link class="logo" to="/" aria-label="Todo App, home" data-tip="Todo App" @pointerdown="disturb" @keydown.enter="disturb">
     <span class="logo__mark" aria-hidden="true">
       <!-- The body: a see-through pane cut to the tick, so the page shows
            through it, blurred and brightened like thick glass. -->
